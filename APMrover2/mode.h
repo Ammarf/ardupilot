@@ -161,6 +161,9 @@ protected:
     // rate_max is a maximum turn rate in deg/s.  set to zero to use default turn rate limits
     void calc_steering_to_heading(float desired_heading_cd, float rate_max_degs = 0.0f);
 
+    // calculate lateral output given a desired lateral acceleration
+    void calc_lateral_from_lateral_acceleration(float lat_accel);
+
     // calculates the amount of throttle that should be output based
     // on things like proximity to corners and current speed
     virtual void calc_throttle(float target_speed, bool nudge_allowed, bool avoidance_enabled);

@@ -318,6 +318,15 @@ bool AP_MotorsUGV::has_sail() const
     return SRV_Channels::function_assigned(SRV_Channel::k_mainsail_sheet);
 }
 
+// return true if the vehicle is capable of lateral movement
+bool AP_MotorsUGV::have_lateral_control() const
+{
+    if (rover.get_frame_type() != FRAME_TYPE_UNDEFINED) {
+        return true;
+    }
+    return false;
+}
+
 void AP_MotorsUGV::output(bool armed, float ground_speed, float dt)
 {
     // soft-armed overrides passed in armed status

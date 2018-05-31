@@ -477,17 +477,21 @@ void Mode::calc_steering_to_waypoint(const struct Location &origin, const struct
 
     if (rover.sailboat_use_indirect_route(desired_heading)) {
         // sailboats use heading controller when tacking upwind
-        desired_heading = rover.sailboat_calc_heading(desired_heading);
+        desired_heading =  rover.sailboat_calc_heading(desired_heading);
         calc_steering_to_heading(desired_heading, g2.pivot_turn_rate);
-    } else if (rover.use_pivot_steering(_yaw_error_cd)) {
-        // for pivot turns use heading controller
+    } else if (g2.motors.have_lateral_control()) {
         calc_steering_to_heading(desired_heading, g2.pivot_turn_rate);
+        calc_lateral_from_lateral_acceleration(desired_lat_accel);
     } else {
-        // call lateral acceleration to steering controller
-        calc_steering_from_lateral_acceleration(desired_lat_accel, reversed);
+        if (rover.use_pivot_steering(_yaw_error_cd)) {
+            // for pivot turns use heading controller
+            calc_steering_to_heading(desired_heading, g2.pivot_turn_rate);
+        } else {
+            // call lateral acceleration to steering controller
+            calc_steering_from_lateral_acceleration(desired_lat_accel, reversed);
+        }
     }
 }
-
 /*
     calculate steering output given lateral_acceleration
 */
@@ -524,6 +528,18 @@ void Mode::calc_steering_to_heading(float desired_heading_cd, float rate_max_deg
                                                                          g2.motors.limit.steer_right,
                                                                          rover.G_Dt);
     g2.motors.set_steering(steering_out * 4500.0f);
+}
+
+// calculate lateral output given a desired lateral acceleration
+void Mode::calc_lateral_from_lateral_acceleration(float lat_accel)
+{
+    // constrain to max G force
+    lat_accel = constrain_float(lat_accel, -g.turn_max_g * GRAVITY_MSS, g.turn_max_g * GRAVITY_MSS);
+
+    const float lateral_out = attitude_control.get_lateral_out_lat_accel(lat_accel);
+
+    // send final lateral control command to motor library
+    g2.motors.set_lateral(lateral_out * 100.0f);
 }
 
 // calculate vehicle stopping point using current location, velocity and maximum acceleration

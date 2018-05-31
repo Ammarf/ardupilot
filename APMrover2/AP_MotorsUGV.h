@@ -88,6 +88,9 @@ public:
     // true if vehicle is capable of skid steering
     bool have_skid_steering() const;
 
+    // return true if the vehicle is capable of lateral movement
+    bool have_lateral_control() const;
+
     // true if vehicle has vectored thrust (i.e. boat with motor on steering servo)
     bool have_vectored_thrust() const { return is_positive(_vector_throttle_base); }
 
