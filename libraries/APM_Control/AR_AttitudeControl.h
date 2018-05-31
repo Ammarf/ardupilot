@@ -34,6 +34,12 @@
 #define AR_ATTCONTROL_HEEL_SAIL_IMAX    1.0f
 #define AR_ATTCONTROL_HEEL_SAIL_FILT    10.0f
 #define AR_ATTCONTROL_DT                0.02f
+#define AR_ATTCONTROL_LATERAL_LAT_FF    0.20f
+#define AR_ATTCONTROL_LATERAL_LAT_P     0.20f
+#define AR_ATTCONTROL_LATERAL_LAT_I     0.20f
+#define AR_ATTCONTROL_LATERAL_LAT_IMAX  1.00f
+#define AR_ATTCONTROL_LATERAL_LAT_D     0.00f
+#define AR_ATTCONTROL_LATERAL_LAT_FILT  10.00f
 
 // throttle/speed control maximum acceleration/deceleration (in m/s) (_ACCEL_MAX parameter default)
 #define AR_ATTCONTROL_THR_ACCEL_MAX     2.00f
@@ -69,6 +75,9 @@ public:
     // positive yaw is to the right
     // return value is normally in range -1.0 to +1.0 but can be higher or lower
     float get_steering_out_rate(float desired_rate, bool motor_limit_left, bool motor_limit_right, float dt);
+
+    // returns a lateral movement output from -1 to +1 given a desired acceleration in m/s/s
+    float get_lateral_out_lat_accel(float desired_accel);
 
     // get latest desired turn rate in rad/sec recorded during calls to get_steering_out_rate.  For reporting purposes only
     float get_desired_turn_rate() const;
@@ -150,6 +159,7 @@ private:
     AC_PID   _throttle_speed_pid;   // throttle speed controller
     AC_PID   _pitch_to_throttle_pid;// balancebot pitch controller
     AP_Float _pitch_to_throttle_speed_ff;   // balancebot feed forward from speed
+    AC_PID   _lateral_lat_pid;      // lateral movement controller
 
     AP_Float _throttle_accel_max;   // speed/throttle control acceleration (and deceleration) maximum in m/s/s.  0 to disable limits
     AP_Float _throttle_decel_max;    // speed/throttle control deceleration maximum in m/s/s. 0 to use ATC_ACCEL_MAX for deceleration
@@ -177,4 +187,7 @@ private:
     // Sailboat heel control
     AC_PID   _sailboat_heel_pid;    // Sailboat heel angle pid controller
     uint32_t _heel_controller_last_ms = 0;
+
+    // lateral control
+    uint32_t _lat_accel_last_ms;     // system time of last call to lateral acceleration controller (i.e. get_lateral_out_lat_accel)
 };

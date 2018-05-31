@@ -218,6 +218,50 @@ const AP_Param::GroupInfo AR_AttitudeControl::var_info[] = {
     // @Increment: 0.01
     // @User: Standard
     AP_GROUPINFO("_BAL_SPD_FF", 11, AR_AttitudeControl, _pitch_to_throttle_speed_ff, AR_ATTCONTROL_BAL_SPEED_FF),
+    
+    // @Param: _LTR_LAT_P
+    // @DisplayName: Lateral control rate P gain
+    // @Description: Lateral control rate P gain.  Converts the desired lateral acceleration to a lateral output from -1 to +1
+    // @Range: 0.000 2.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: _LTR_LAT_I
+    // @DisplayName: Lateral control I gain
+    // @Description: Lateral control I gain.  Corrects long term error between the desired and actual lateral acceleration
+    // @Range: 0.000 2.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: _LTR_LAT_IMAX
+    // @DisplayName: Lateral control I gain maximum
+    // @Description: Lateral control I gain maximum.  Constraings the lateral output (range -1 to +1) that the I term will generate
+    // @Range: 0.000 1.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: LTR_RAT_D
+    // @DisplayName: Steering control D gain
+    // @Description: Steering control D gain.  Compensates for short-term change in desired lateral acceleration vs actual
+    // @Range: 0.000 0.400
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: _LTR_LAT_FF
+    // @DisplayName: Lateral control feed forward
+    // @Description: Lateral control feed forward
+    // @Range: 0.000 3.000
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: _LTR_LAT_FILT
+    // @DisplayName: Lateral control filter frequency
+    // @Description: Lateral control input filter.  Lower values reduce noise but add delay.
+    // @Range: 0.000 100.000
+    // @Increment: 0.1
+    // @Units: Hz
+    // @User: Standard
+    AP_SUBGROUPINFO(_lateral_lat_pid, "_LTR_LAT", 12, AR_AttitudeControl, AC_PID),
 
     // @Param: _SAIL_P
     // @DisplayName: Sail Heel control P gain
@@ -271,8 +315,9 @@ AR_AttitudeControl::AR_AttitudeControl(AP_AHRS &ahrs) :
     _steer_rate_pid(AR_ATTCONTROL_STEER_RATE_P, AR_ATTCONTROL_STEER_RATE_I, AR_ATTCONTROL_STEER_RATE_D, AR_ATTCONTROL_STEER_RATE_IMAX, AR_ATTCONTROL_STEER_RATE_FILT, AR_ATTCONTROL_DT, AR_ATTCONTROL_STEER_RATE_FF),
     _throttle_speed_pid(AR_ATTCONTROL_THR_SPEED_P, AR_ATTCONTROL_THR_SPEED_I, AR_ATTCONTROL_THR_SPEED_D, AR_ATTCONTROL_THR_SPEED_IMAX, AR_ATTCONTROL_THR_SPEED_FILT, AR_ATTCONTROL_DT),
     _pitch_to_throttle_pid(AR_ATTCONTROL_PITCH_THR_P, AR_ATTCONTROL_PITCH_THR_I, AR_ATTCONTROL_PITCH_THR_D, AR_ATTCONTROL_PITCH_THR_IMAX, AR_ATTCONTROL_PITCH_THR_FILT, AR_ATTCONTROL_DT),
-    _sailboat_heel_pid(AR_ATTCONTROL_HEEL_SAIL_P, AR_ATTCONTROL_HEEL_SAIL_I, AR_ATTCONTROL_HEEL_SAIL_D, AR_ATTCONTROL_HEEL_SAIL_IMAX, AR_ATTCONTROL_HEEL_SAIL_FILT, AR_ATTCONTROL_DT)
-    {
+    _sailboat_heel_pid(AR_ATTCONTROL_HEEL_SAIL_P, AR_ATTCONTROL_HEEL_SAIL_I, AR_ATTCONTROL_HEEL_SAIL_D, AR_ATTCONTROL_HEEL_SAIL_IMAX, AR_ATTCONTROL_HEEL_SAIL_FILT, AR_ATTCONTROL_DT),
+    _lateral_lat_pid(AR_ATTCONTROL_LATERAL_LAT_P, AR_ATTCONTROL_LATERAL_LAT_I, AR_ATTCONTROL_LATERAL_LAT_D, AR_ATTCONTROL_LATERAL_LAT_IMAX, AR_ATTCONTROL_LATERAL_LAT_FILT, AR_ATTCONTROL_DT, AR_ATTCONTROL_LATERAL_LAT_FF)
+{
     AP_Param::setup_object_defaults(this, var_info);
 }
 
@@ -384,6 +429,50 @@ float AR_AttitudeControl::get_steering_out_rate(float desired_rate, bool motor_l
 
     // constrain and return final output
     return (ff + p + i + d);
+}
+
+// returns a lateral movement output from -1 to +1 given a desired acceleration in m/s/s
+float AR_AttitudeControl::get_lateral_out_lat_accel(float desired_accel)
+{
+    // calculate dt
+    const uint32_t now = AP_HAL::millis();
+    float dt = constrain_float((now - _lat_accel_last_ms) / 1000.0f, 0.0f, 1.0f);
+
+    // if not called recently, reset input filrer and desired_accel to actual lateral acceleration
+    if ((_lat_accel_last_ms == 0) || (dt > (AR_ATTCONTROL_TIMEOUT_MS / 1000.0f))) {
+        dt = 0.0f;
+        _lateral_lat_pid.reset_filter();
+        _lateral_lat_pid.reset_I();
+        desired_accel = _ahrs.get_accel_ef_blended().y;
+    }
+    _lat_accel_last_ms = now;
+
+    // calculate the rate error
+    const float rate_error = (desired_accel - _ahrs.get_accel_ef_blended().y);
+
+    // set PID's dt
+    _lateral_lat_pid.set_dt(dt);
+
+    // record desired acceleration for logging purposes
+    _lateral_lat_pid.set_desired_rate(desired_accel);
+
+    // pass error to PID controller
+    _lateral_lat_pid.set_input_filter_all(rate_error);
+
+    // get feed-forward
+    const float ff = _lateral_lat_pid.get_ff(desired_accel);
+
+    // get P
+    const float p = _lateral_lat_pid.get_p();
+
+    // get I
+    float i = _lateral_lat_pid.get_integrator();
+
+    // det D
+    const float d = _lateral_lat_pid.get_d();
+
+    // constrain and return the final output
+    return constrain_float(ff + p + i + d, -1.0f, 1.0f);
 }
 
 // get latest desired turn rate in rad/sec (recorded during calls to get_steering_out_rate)
