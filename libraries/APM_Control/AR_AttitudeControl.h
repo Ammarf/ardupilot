@@ -23,7 +23,7 @@
 #define AR_ATTCONTROL_DT                0.02f
 #define AR_ATTCONTROL_TIMEOUT_MS        200
 
-// throttle/speed control maximum acceleration/deceleration (in m/s) (_ACCEL_MAX parameter default)
+// throttle/speed control maximum acceleration (in m/s) (_ACCEL_MAX parameter default)
 #define AR_ATTCONTROL_THR_ACCEL_MAX     2.00f
 
 // minimum speed in m/s
@@ -89,11 +89,11 @@ public:
     // get forward speed in m/s (earth-frame horizontal velocity but only along vehicle x-axis).  returns true on success
     bool get_forward_speed(float &speed) const;
 
-    // get throttle/speed controller maximum acceleration (also used for deceleration)
+    // get throttle/speed controller maximum acceleration
     float get_accel_max() const { return MAX(_throttle_accel_max, 0.0f); }
 
     // get throttle/speed controller maximum deceleration
-    float get_decel_max() const;
+    float get_decel_max() const { return MAX(_throttle_decel_max, 0.0f); }
 
     // check if speed controller active
     bool speed_control_active() const;
@@ -119,7 +119,7 @@ private:
     AC_P     _steer_angle_p;        // steering angle controller
     AC_PID   _steer_rate_pid;       // steering rate controller
     AC_PID   _throttle_speed_pid;   // throttle speed controller
-    AP_Float _throttle_accel_max;   // speed/throttle control acceleration (and deceleration) maximum in m/s/s.  0 to disable limits
+    AP_Float _throttle_accel_max;   // speed/throttle control acceleration maximum in m/s/s.  0 to disable limits
     AP_Float _throttle_decel_max;    // speed/throttle control deceleration maximum in m/s/s. 0 to disable limits
     AP_Int8  _brake_enable;         // speed control brake enable/disable. if set to 1 a reversed output to the motors to slow the vehicle.
     AP_Float _stop_speed;           // speed control stop speed.  Motor outputs to zero once vehicle speed falls below this value

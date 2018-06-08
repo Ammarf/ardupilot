@@ -463,15 +463,6 @@ bool AR_AttitudeControl::get_forward_speed(float &speed) const
     return true;
 }
 
-float AR_AttitudeControl::get_decel_max() const
-{
-    if (is_positive(_throttle_decel_max)) {
-        return _throttle_decel_max;
-    } else {
-        return _throttle_accel_max;
-    }
-}
-
 // check if speed controller active
 bool AR_AttitudeControl::speed_control_active() const
 {
@@ -508,7 +499,7 @@ float AR_AttitudeControl::get_desired_speed_accel_limited(float desired_speed, f
 
     // acceleration limit desired speed
     float speed_change_max;
-    if (fabsf(desired_speed) < fabsf(_desired_speed) && is_positive(_throttle_decel_max)) {
+    if (fabsf(desired_speed) < fabsf(_desired_speed)) {
         speed_change_max = _throttle_decel_max * dt;
     } else {
         speed_change_max = _throttle_accel_max * dt;
