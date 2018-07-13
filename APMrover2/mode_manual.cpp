@@ -30,9 +30,9 @@ void ModeManual::update()
     float magnitude_max = 1.0;
     float theta_max = 1.0;
     const float magnitude = safe_sqrt((scaled_throttle*scaled_throttle)+(scaled_steering*scaled_steering));
-    float theta;
+    float theta =  0;
     float theta_cd = 0;
-    //= atan2f(scaled_steering,scaled_throttle);
+    //float theta = atan2f(scaled_throttle,scaled_steering);
 
     if (fabsf(magnitude) > magnitude_max) {
         magnitude_max = magnitude;
@@ -40,25 +40,26 @@ void ModeManual::update()
 
     float magnitude_final = magnitude / magnitude_max;
 
+
     // 1st quadrant
     if ((scaled_throttle > 0) && (scaled_steering > 0)) {
         theta = atan2f(scaled_throttle,scaled_steering);
-        theta_cd = theta;
+        theta_cd = theta* 100.0f;
     }
     // 2nd quadrant
     if ((scaled_throttle < 0) && (scaled_steering > 0)) {
         theta = atan2f(scaled_throttle,scaled_steering);
-        theta_cd = 180.0 - theta;
+        theta_cd = (180.0 - theta) * 100.0f;
     }
     // 3rd quadrant
     if ((scaled_throttle < 0) && (scaled_steering < 0)) {
         theta = atan2f(scaled_throttle,scaled_steering);
-        theta_cd = 270.0 - theta;
+        theta_cd = (270.0 - theta) * 100.0f;
     }
     // 4th quadrant
     if ((scaled_throttle > 0) && (scaled_steering < 0)) {
         theta = atan2f(scaled_throttle,scaled_steering);
-        theta_cd = 360.0 - theta;
+        theta_cd = (360.0 - theta) * 100.0f;
     }
 
     if (fabsf(theta_cd) > theta_max) {
