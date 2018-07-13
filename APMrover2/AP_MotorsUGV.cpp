@@ -171,6 +171,7 @@ void AP_MotorsUGV::set_steering(float steering, bool apply_scaling)
 {
     _steering = steering;
     _scale_steering = apply_scaling;
+    //hal.console->printf("steering is %lf \n", _steering);
 }
 
 // set throttle as a value from -100 to 100
