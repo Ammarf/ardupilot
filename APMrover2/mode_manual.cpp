@@ -18,67 +18,38 @@ void ModeManual::update()
         rover.balancebot_pitch_control(desired_throttle, rover.arming.is_armed());
     }
 
-    // cruise mode code
-/*
     desired_throttle = constrain_float(desired_throttle, -100.0f, 100.0f);
     desired_steering = constrain_float(desired_steering, -4500.0f, 4500.0f);
 
-    // scale steering and throttle inputs to -1 to +1 range
+    // scale steering and throttle down to a -1 to +1 range
     float scaled_throttle = desired_throttle / 100.0f;
     float scaled_steering = desired_steering / 4500.0f;
 
-    float magnitude_max = 1.0;
-    float theta_max = 1.0;
-    const float magnitude = safe_sqrt((scaled_throttle*scaled_throttle)+(scaled_steering*scaled_steering));
-    float theta =  0;
-    float theta_cd = 0;
-    //float theta = atan2f(scaled_throttle,scaled_steering);
+    float magnitude_max = 1.0f;
+    float theta_max = 1.0f;
 
+    float magnitude = safe_sqrt(sq(scaled_throttle) + sq(scaled_steering));
     if (fabsf(magnitude) > magnitude_max) {
         magnitude_max = magnitude;
     }
 
-    float magnitude_final = magnitude / magnitude_max;
+    float speed = magnitude / magnitude_max;
 
-
-    // 1st quadrant
-    if ((scaled_throttle > 0) && (scaled_steering > 0)) {
-        theta = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
-        theta_cd = theta;
-    }
-    // 2nd quadrant
-    if ((scaled_throttle < 0) && (scaled_steering > 0)) {
-        theta = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
-        theta_cd = (180.0 * DEGX100 - theta);
-    }
-    // 3rd quadrant
-    if ((scaled_throttle < 0) && (scaled_steering < 0)) {
-        theta = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
-        theta_cd = (270.0 * DEGX100 - theta);
-    }
-    // 4th quadrant
-    if ((scaled_throttle > 0) && (scaled_steering < 0)) {
-        theta = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
-        theta_cd = (360.0 * DEGX100 - theta);
+    if (is_negative(scaled_throttle)) {
+        scaled_steering *= -1.0f;
     }
 
+    float theta = wrap_360_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+    //float desired_heading = ahrs.yaw_sensor - theta;
 
-    theta_cd = (atan2f(scaled_steering,scaled_throttle) * DEGX100);
+    hal.console->printf("theta is %lf \n", theta);
+    hal.console->printf("yaw is %d \n", ahrs.yaw_sensor);
 
-    if (fabsf(theta_cd) > theta_max) {
-        theta_max = theta_cd;
-    }
-
-    float theta_final = theta_cd;
-*/
-    hal.console->printf("throttle is %lf \n", desired_throttle);
-    //hal.console->printf("steering is %lf \n", scaled_steering);
-    //hal.console->printf("theta final is %lf \n", theta_final);
-    //hal.console->printf("yaw is %d \n", ahrs.yaw_sensor);
-    //hal.console->printf("steering output is %lf \n", (theta_final));
 
     // copy RC scaled inputs to outputs
-    //g2.motors.set_throttle(magnitude_final * 100.0f);
-    //calc_steering_to_heading((0 - theta_final) * 4500.0f, _desired_speed < 0);
-    //g2.motors.set_steering((0 - theta_final) * 4500.0f, false);
+    calc_steering_to_heading(theta, _desired_speed < 0);
+    calc_throttle(speed, false, true);
+    //g2.motors.set_throttle(magnitude * 100.0f);
+    //g2.motors.set_steering(radians(desired_heading * 0.01f) * 4500.0f, false);
+
 }
