@@ -19,7 +19,7 @@ void ModeManual::update()
     }
 
     // cruise mode code
-
+/*
     desired_throttle = constrain_float(desired_throttle, -100.0f, 100.0f);
     desired_steering = constrain_float(desired_steering, -4500.0f, 4500.0f);
 
@@ -43,39 +43,42 @@ void ModeManual::update()
 
     // 1st quadrant
     if ((scaled_throttle > 0) && (scaled_steering > 0)) {
-        theta = atan2f(scaled_throttle,scaled_steering);
-        theta_cd = theta* 100.0f;
+        theta = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+        theta_cd = theta;
     }
     // 2nd quadrant
     if ((scaled_throttle < 0) && (scaled_steering > 0)) {
-        theta = atan2f(scaled_throttle,scaled_steering);
-        theta_cd = (180.0 - theta) * 100.0f;
+        theta = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+        theta_cd = (180.0 * DEGX100 - theta);
     }
     // 3rd quadrant
     if ((scaled_throttle < 0) && (scaled_steering < 0)) {
-        theta = atan2f(scaled_throttle,scaled_steering);
-        theta_cd = (270.0 - theta) * 100.0f;
+        theta = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+        theta_cd = (270.0 * DEGX100 - theta);
     }
     // 4th quadrant
     if ((scaled_throttle > 0) && (scaled_steering < 0)) {
-        theta = atan2f(scaled_throttle,scaled_steering);
-        theta_cd = (360.0 - theta) * 100.0f;
+        theta = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+        theta_cd = (360.0 * DEGX100 - theta);
     }
+
+
+    theta_cd = (atan2f(scaled_steering,scaled_throttle) * DEGX100);
 
     if (fabsf(theta_cd) > theta_max) {
         theta_max = theta_cd;
     }
 
     float theta_final = theta_cd;
-
-    //hal.console->printf("MAGNITUDE is %lf \n", magnitude);
-    hal.console->printf("theta final is %lf \n", theta_final);
-    //hal.console->printf("output is %lf \n", output_final);
+*/
+    hal.console->printf("throttle is %lf \n", desired_throttle);
+    //hal.console->printf("steering is %lf \n", scaled_steering);
+    //hal.console->printf("theta final is %lf \n", theta_final);
     //hal.console->printf("yaw is %d \n", ahrs.yaw_sensor);
     //hal.console->printf("steering output is %lf \n", (theta_final));
 
     // copy RC scaled inputs to outputs
-    g2.motors.set_throttle(magnitude_final * 100.0f);
+    //g2.motors.set_throttle(magnitude_final * 100.0f);
     //calc_steering_to_heading((0 - theta_final) * 4500.0f, _desired_speed < 0);
     //g2.motors.set_steering((0 - theta_final) * 4500.0f, false);
 }
