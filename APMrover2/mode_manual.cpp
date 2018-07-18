@@ -48,12 +48,15 @@ void ModeManual::update()
     }
 
     // calculate angle of input stick vector
-    _desired_yaw_cd = wrap_360_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+    _desired_yaw_cd = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+
+    // reset heading when the vehicle is stopped
+    if (throttle == 0.0f) {
+        g2.motors.set_throttle(0.0f);
+    }
 
     // run steering and throttle controllers
-    //calc_steering_to_heading(theta, _desired_speed < 0);
+    calc_steering_to_heading(_desired_yaw_cd, throttle < 0);
 
-    hal.console->printf("throttle is %lf \n", desired_throttle);
-
-    g2.motors.set_throttle(throttle);
+    g2.motors.set_throttle(throttle * 100.0f);
 }
