@@ -7,11 +7,22 @@ void ModeManual::_exit()
     g2.motors.set_lateral(0);
 }
 
+bool ModeManual::_enter()
+{
+    //initialize stuff
+    _desired_yaw_cd = ahrs.yaw_sensor;
+    _yaw_error_cd = 0.0f;
+
+    return true;
+}
+
 void ModeManual::update()
 {
     // get pilot input
     float desired_steering, desired_throttle;
     get_pilot_desired_steering_and_throttle(desired_steering, desired_throttle);
+
+    //hal.console->printf("throttle is %lf \n", desired_throttle);
 
     // constrain steering and throttle inputs
     desired_throttle = constrain_float(desired_throttle, -100.0f, 100.0f);
@@ -29,15 +40,20 @@ void ModeManual::update()
     }
     float throttle = magnitude / magnitude_max;
 
+    //hal.console->printf("throttle is %lf \n", throttle);
+
     // reverse steering when throttle is negative to correct heading angle
     if (is_negative(scaled_throttle)) {
         scaled_steering *= -1.0f;
     }
 
     // calculate angle of input stick vector
-    float theta = wrap_360_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+    _desired_yaw_cd = wrap_360_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
 
     // run steering and throttle controllers
-    calc_steering_to_heading(theta, _desired_speed < 0);
+    //calc_steering_to_heading(theta, _desired_speed < 0);
+
+    hal.console->printf("throttle is %lf \n", desired_throttle);
+
     g2.motors.set_throttle(throttle);
 }

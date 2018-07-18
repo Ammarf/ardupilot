@@ -376,6 +376,7 @@ public:
 protected:
 
     void _exit() override;
+    bool _enter() override;
 };
 
 
