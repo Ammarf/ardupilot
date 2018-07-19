@@ -48,7 +48,13 @@ void ModeManual::update()
     }
 
     // calculate angle of input stick vector
-    _desired_yaw_cd = wrap_180_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+    _desired_yaw_cd = wrap_360_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
+
+    //_yaw_error_cd = ahrs.sin_yaw();
+    float final_heading = ((ahrs.sin_yaw() - sinf(_desired_yaw_cd)) * 4500.0f);
+
+    hal.console->printf("yaw_error is %lf \n", final_heading);
+
 
     // reset heading when the vehicle is stopped
     if (throttle == 0.0f) {
@@ -56,7 +62,7 @@ void ModeManual::update()
     }
 
     // run steering and throttle controllers
-    calc_steering_to_heading(_desired_yaw_cd, throttle < 0);
+    //calc_steering_to_heading(_desired_yaw_cd, throttle < 0);
 
     g2.motors.set_throttle(throttle * 100.0f);
 }
