@@ -42,6 +42,7 @@ void ModeManual::update()
 
     //hal.console->printf("throttle is %lf \n", throttle);
 
+
     // reverse steering when throttle is negative to correct heading angle
     if (is_negative(scaled_throttle)) {
         scaled_steering *= -1.0f;
@@ -51,18 +52,28 @@ void ModeManual::update()
     _desired_yaw_cd = wrap_360_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
 
     //_yaw_error_cd = ahrs.sin_yaw();
-    float final_heading = ((ahrs.sin_yaw() - sinf(_desired_yaw_cd)) * 4500.0f);
+    float final_heading1 = _desired_yaw_cd - ahrs.yaw_sensor;
 
-    hal.console->printf("yaw_error is %lf \n", final_heading);
-
-
-    // reset heading when the vehicle is stopped
-    if (throttle == 0.0f) {
-        g2.motors.set_throttle(0.0f);
+    if (is_negative(scaled_steering)) {
+        final_heading1 = 36000.0f - (_desired_yaw_cd - ahrs.yaw_sensor);
     }
 
-    // run steering and throttle controllers
-    //calc_steering_to_heading(_desired_yaw_cd, throttle < 0);
+    float final_heading2 = radians(final_heading1 * 0.01f);
 
+    float final_heading_max = 1.0f;
+
+    if (fabsf(final_heading2) > final_heading_max) {
+        final_heading_max = final_heading2;
+    }
+
+    float final_heading3 = final_heading2 / final_heading_max;
+
+    if (scaled_steering < 0.0f) {
+        final_heading3 = final_heading3 * -1.0f;
+    }
+
+    hal.console->printf("yaw_error is %lf \n", final_heading3);
+
+    g2.motors.set_steering(final_heading3 * 4500.0f, false);
     g2.motors.set_throttle(throttle * 100.0f);
 }
