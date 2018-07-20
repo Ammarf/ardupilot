@@ -36,27 +36,21 @@ void ModeManual::update()
     float magnitude_max = 1.0f;
     float magnitude = safe_sqrt(sq(scaled_throttle) + sq(scaled_steering));
     if (fabsf(magnitude) > magnitude_max) {
-        magnitude_max = magnitude;
+        magnitude = magnitude_max;
     }
     float throttle = magnitude / magnitude_max;
 
     //hal.console->printf("throttle is %lf \n", throttle);
 
-
-    // reverse steering when throttle is negative to correct heading angle
-    if (is_negative(scaled_throttle)) {
-        scaled_steering *= -1.0f;
-    }
-
     // calculate angle of input stick vector
     _desired_yaw_cd = wrap_360_cd(atan2f(scaled_steering,scaled_throttle) * DEGX100);
 
+    if (is_negative(scaled_throttle)) {
+        _desired_yaw_cd = 36000.0f - _desired_yaw_cd;
+    }
+
     //_yaw_error_cd = ahrs.sin_yaw();
     float final_heading1 = _desired_yaw_cd - ahrs.yaw_sensor;
-
-    if (is_negative(scaled_steering)) {
-        final_heading1 = 36000.0f - (_desired_yaw_cd - ahrs.yaw_sensor);
-    }
 
     float final_heading2 = radians(final_heading1 * 0.01f);
 
@@ -67,13 +61,14 @@ void ModeManual::update()
     }
 
     float final_heading3 = final_heading2 / final_heading_max;
-
+/*
     if (scaled_steering < 0.0f) {
         final_heading3 = final_heading3 * -1.0f;
     }
+*/
+    //hal.console->printf("yaw_error is %lf \n", _desired_yaw_cd);
 
-    hal.console->printf("yaw_error is %lf \n", final_heading3);
-
-    g2.motors.set_steering(final_heading3 * 4500.0f, false);
+    //g2.motors.set_steering(final_heading3 * 4500.0f, false);
+    calc_steering_to_heading(_desired_yaw_cd, throttle < 0);
     g2.motors.set_throttle(throttle * 100.0f);
 }
