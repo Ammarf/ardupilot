@@ -1,12 +1,6 @@
 #include "mode.h"
 #include "Rover.h"
 
-void ModeManual::_exit()
-{
-    // clear lateral when exiting manual mode
-    g2.motors.set_lateral(0);
-}
-
 void ModeManual::update()
 {
     float desired_steering, desired_throttle, desired_lateral;

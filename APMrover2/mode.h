@@ -449,10 +449,6 @@ public:
     // manual mode does not require position or velocity estimate
     bool requires_position() const override { return false; }
     bool requires_velocity() const override { return false; }
-
-protected:
-
-    void _exit() override;
 };
 
 
