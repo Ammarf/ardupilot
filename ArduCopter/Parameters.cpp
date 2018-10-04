@@ -1004,6 +1004,20 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(visual_odom, "VISO", 18, ParametersG2, AP_VisualOdom),
 #endif
 
+    // @Param: HOLD_SETPOINT
+    // @DisplayName: Setpoint for copter hold
+    // @Description: distance from obstacle at which the copter will hold its position
+    // @Values: 100 1000
+    // @User: Advanced
+    AP_GROUPINFO("HOLD_SETPOINT", 19, ParametersG2, hold_setpoint, 200),
+
+    // @Param: HOLD_RANGE
+    // @DisplayName: Range for copter hold
+    // @Description: Range in which the copter hold mode will be working
+    // @Range: 100 1000
+    // @User: Advanced
+    AP_GROUPINFO("HOLD_RANGE", 20, ParametersG2, hold_range, 200),
+
     AP_GROUPEND
 };
 

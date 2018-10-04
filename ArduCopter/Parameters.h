@@ -569,6 +569,10 @@ public:
     
     // control over servo output ranges
     SRV_Channels servo_channels;
+
+    // copter hold
+    AP_Float hold_setpoint;
+    AP_Float hold_range;
 };
 
 extern const AP_Param::Info        var_info[];
