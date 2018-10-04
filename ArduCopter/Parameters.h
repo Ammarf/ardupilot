@@ -573,6 +573,15 @@ public:
     // copter hold
     AP_Float hold_setpoint;
     AP_Float hold_range;
+    AC_PID hold_pid;
+
+#define HOLD_P       2.0f
+#define HOLD_I       0.0f
+#define HOLD_D       0.0f
+#define HOLD_IMAX    1.0f
+#define HOLD_FILT    10.0f
+#define HOLD_DT      0.02f
+
 };
 
 extern const AP_Param::Info        var_info[];

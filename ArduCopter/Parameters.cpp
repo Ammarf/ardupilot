@@ -1008,15 +1008,60 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @DisplayName: Setpoint for copter hold
     // @Description: distance from obstacle at which the copter will hold its position
     // @Values: 100 1000
-    // @User: Advanced
+    // @Increment: 10.0
+    // @User: Standard
     AP_GROUPINFO("HOLD_SETPOINT", 19, ParametersG2, hold_setpoint, 200),
 
     // @Param: HOLD_RANGE
     // @DisplayName: Range for copter hold
     // @Description: Range in which the copter hold mode will be working
     // @Range: 100 1000
-    // @User: Advanced
+    // @Increment: 10.0
+    // @User: Standard
     AP_GROUPINFO("HOLD_RANGE", 20, ParametersG2, hold_range, 200),
+
+    // @Param: HOLD_P
+    // @DisplayName: Copter hold control P gain
+    // @Description: Copter hold control P gain
+    // @Range: 0.000 2.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: HOLD_I
+    // @DisplayName: Copter hold control I gain
+    // @Description: Copter hold control I gain
+    // @Range: 0.000 2.000
+    // @User: Standard
+
+    // @Param: HOLD_IMAX
+    // @DisplayName: Copter hold I gain maximum
+    // @Description: Copter hold I gain maximum
+    // @Range: 0.000 1.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: HOLD_D
+    // @DisplayName: Copter hold control D gain
+    // @Description: Copter hold control D gain
+    // @Range: 0.000 0.100
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: HOLD_FF
+    // @DisplayName: Copter hold feed forward
+    // @Description: Copter hold feed forward
+    // @Range: 0.000 0.500
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: HOLD_FILT
+    // @DisplayName: Copter hold filter frequency
+    // @Description: Copter hold filter frequency
+    // @Range: 0.000 100.000
+    // @Increment: 0.1
+    // @Units: Hz
+    // @User: Standard
+AP_SUBGROUPINFO(hold_pid, "_HOLD", 21, ParametersG2, AC_PID),
 
     AP_GROUPEND
 };
@@ -1033,6 +1078,8 @@ ParametersG2::ParametersG2(void)
 #if ADVANCED_FAILSAFE == ENABLED
     ,afs(copter.mission, copter.barometer, copter.gps, copter.rcmap)
 #endif
+, hold_pid(HOLD_P, HOLD_I, HOLD_D, HOLD_IMAX, HOLD_FILT, HOLD_DT)
+
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
