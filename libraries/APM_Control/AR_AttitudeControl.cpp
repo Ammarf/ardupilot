@@ -218,50 +218,6 @@ const AP_Param::GroupInfo AR_AttitudeControl::var_info[] = {
     // @Increment: 0.01
     // @User: Standard
     AP_GROUPINFO("_BAL_SPD_FF", 11, AR_AttitudeControl, _pitch_to_throttle_speed_ff, AR_ATTCONTROL_BAL_SPEED_FF),
-    
-    // @Param: _LTR_LAT_P
-    // @DisplayName: Lateral control rate P gain
-    // @Description: Lateral control rate P gain.  Converts the desired lateral acceleration to a lateral output from -1 to +1
-    // @Range: 0.000 2.000
-    // @Increment: 0.01
-    // @User: Standard
-
-    // @Param: _LTR_LAT_I
-    // @DisplayName: Lateral control I gain
-    // @Description: Lateral control I gain.  Corrects long term error between the desired and actual lateral acceleration
-    // @Range: 0.000 2.000
-    // @Increment: 0.01
-    // @User: Standard
-
-    // @Param: _LTR_LAT_IMAX
-    // @DisplayName: Lateral control I gain maximum
-    // @Description: Lateral control I gain maximum.  Constraings the lateral output (range -1 to +1) that the I term will generate
-    // @Range: 0.000 1.000
-    // @Increment: 0.01
-    // @User: Standard
-
-    // @Param: LTR_RAT_D
-    // @DisplayName: Steering control D gain
-    // @Description: Steering control D gain.  Compensates for short-term change in desired lateral acceleration vs actual
-    // @Range: 0.000 0.400
-    // @Increment: 0.001
-    // @User: Standard
-
-    // @Param: _LTR_LAT_FF
-    // @DisplayName: Lateral control feed forward
-    // @Description: Lateral control feed forward
-    // @Range: 0.000 3.000
-    // @Increment: 0.001
-    // @User: Standard
-
-    // @Param: _LTR_LAT_FILT
-    // @DisplayName: Lateral control filter frequency
-    // @Description: Lateral control input filter.  Lower values reduce noise but add delay.
-    // @Range: 0.000 100.000
-    // @Increment: 0.1
-    // @Units: Hz
-    // @User: Standard
-    AP_SUBGROUPINFO(_lateral_lat_pid, "_LTR_LAT", 12, AR_AttitudeControl, AC_PID),
 
     // @Param: _SAIL_P
     // @DisplayName: Sail Heel control P gain
@@ -305,6 +261,50 @@ const AP_Param::GroupInfo AR_AttitudeControl::var_info[] = {
     // @Units: Hz
     // @User: Standard
     AP_SUBGROUPINFO(_sailboat_heel_pid, "_SAIL_", 12, AR_AttitudeControl, AC_PID),
+    
+    // @Param: _LTR_LAT_P
+    // @DisplayName: Lateral control rate P gain
+    // @Description: Lateral control rate P gain.  Converts the desired lateral acceleration to a lateral output from -1 to +1
+    // @Range: 0.000 2.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: _LTR_LAT_I
+    // @DisplayName: Lateral control I gain
+    // @Description: Lateral control I gain.  Corrects long term error between the desired and actual lateral acceleration
+    // @Range: 0.000 2.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: _LTR_LAT_IMAX
+    // @DisplayName: Lateral control I gain maximum
+    // @Description: Lateral control I gain maximum.  Constraings the lateral output (range -1 to +1) that the I term will generate
+    // @Range: 0.000 1.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: LTR_RAT_D
+    // @DisplayName: Steering control D gain
+    // @Description: Steering control D gain.  Compensates for short-term change in desired lateral acceleration vs actual
+    // @Range: 0.000 0.400
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: _LTR_LAT_FF
+    // @DisplayName: Lateral control feed forward
+    // @Description: Lateral control feed forward
+    // @Range: 0.000 3.000
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: _LTR_LAT_FILT
+    // @DisplayName: Lateral control filter frequency
+    // @Description: Lateral control input filter.  Lower values reduce noise but add delay.
+    // @Range: 0.000 100.000
+    // @Increment: 0.1
+    // @Units: Hz
+    // @User: Standard
+    AP_SUBGROUPINFO(_lateral_lat_pid, "_LTR_LAT", 13, AR_AttitudeControl, AC_PID),
 
     AP_GROUPEND
 };
