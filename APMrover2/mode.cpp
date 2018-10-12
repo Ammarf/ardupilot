@@ -348,6 +348,9 @@ bool Mode::stop_vehicle()
     // do not attempt to steer
     g2.motors.set_steering(0.0f);
 
+    // set lateral to zero
+    g2.motors.set_lateral(0.0f);
+
     // return true once stopped
     return stopped;
 }
