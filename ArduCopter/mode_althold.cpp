@@ -30,11 +30,11 @@ void Copter::ModeAltHold::run()
     copter.rangefinder.update();
     //AP_RangeFinder_Backend *s0 = rangefinder.get_backend(0);
 
-    //float lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_45);
+    float lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_45);
     //input_lidar = copter.rangefinder.
 
-    uint16_t s0 = copter.rangefinder._add_backend(0);
-    float lidar_input = s0->distance_cm();
+    //uint16_t s0 = copter.rangefinder._add_backend(0);
+    //float lidar_input = s0->distance_cm();
 
     hal.console->printf("lidar_input is %lf \n", lidar_input);
 
