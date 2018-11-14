@@ -948,6 +948,49 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(user_parameters, "USR", 28, ParametersG2, UserParameters),
 #endif
 
+    // @Param: HOLD_P
+    // @DisplayName: Copter hold control P gain
+    // @Description: Copter hold control P gain
+    // @Range: 0.000 2.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: HOLD_I
+    // @DisplayName: Copter hold control I gain
+    // @Description: Copter hold control I gain
+    // @Range: 0.000 2.000
+    // @User: Standard
+
+    // @Param: HOLD_IMAX
+    // @DisplayName: Copter hold I gain maximum
+    // @Description: Copter hold I gain maximum
+    // @Range: 0.000 1.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: HOLD_D
+    // @DisplayName: Copter hold control D gain
+    // @Description: Copter hold control D gain
+    // @Range: 0.000 0.100
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: HOLD_FF
+    // @DisplayName: Copter hold feed forward
+    // @Description: Copter hold feed forward
+    // @Range: 0.000 0.500
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: HOLD_FILT
+    // @DisplayName: Copter hold filter frequency
+    // @Description: Copter hold filter frequency
+    // @Range: 0.000 100.000
+    // @Increment: 0.1
+    // @Units: Hz
+    // @User: Standard
+AP_SUBGROUPINFO(hold_pid, "_HOLD", 28, ParametersG2, AC_PID),
+
     AP_GROUPEND
 };
 
@@ -1016,6 +1059,7 @@ ParametersG2::ParametersG2(void)
 #ifdef USER_PARAMS_ENABLED
     ,user_parameters()
 #endif
+    , hold_pid(HOLD_P, HOLD_I, HOLD_D, HOLD_IMAX, HOLD_FILT, HOLD_DT, HOLD_FF)
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
