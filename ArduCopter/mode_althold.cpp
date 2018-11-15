@@ -24,6 +24,15 @@ void Copter::ModeAltHold::run()
     AltHoldModeState althold_state;
     float takeoff_climb_rate = 0.0f;
 
+    RC_Channel *rc12 = RC_Channels::rc_channel(CH_12);
+    RC_Channel *rc14 = RC_Channels::rc_channel(CH_14);
+
+    copter.rangefinder.update();
+
+    float lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90);
+
+    //hal.console->printf("lidar_input is %lf \n", lidar_input);
+
     // initialize vertical speeds and acceleration
     pos_control->set_speed_z(-get_pilot_speed_dn(), g.pilot_speed_up);
     pos_control->set_accel_z(g.pilot_accel_z);
@@ -141,18 +150,59 @@ void Copter::ModeAltHold::run()
         copter.avoid.adjust_roll_pitch(target_roll, target_pitch, copter.aparm.angle_max);
 #endif
 
-        // call attitude controller
-        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
+        uint16_t radio12_in = rc12->get_radio_in();
+        uint16_t radio14_in = rc14->get_radio_in();
 
-        // adjust climb rate using rangefinder
-        target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control->get_alt_target(), G_Dt);
+        if (radio14_in > 1800 && lidar_input < 600) {
 
-        // get avoidance adjusted climb rate
-        target_climb_rate = get_avoidance_adjusted_climbrate(target_climb_rate);
+            float setpoint = (radio12_in - 1094) * (600.0f - 200.0f) / (1934 - 1094) + 200.0f;
+            float lidar_error = lidar_input - setpoint;
 
-        // call position controller
-        pos_control->set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
-        pos_control->update_z_controller();
-        break;
+            float lidar_error_max = 1.00f;
+            float lidar_error_factor = lidar_error / lidar_error_max;
+
+            g2.hold_pid.set_input_filter_all(lidar_error);
+            float control_p = g2.hold_pid.get_p();
+            float control_i = g2.hold_pid.get_i();
+            float control_d = g2.hold_pid.get_d();
+            float control_ff = g2.hold_pid.get_ff(lidar_error_factor);
+
+
+            //hal.console->printf("lidar_error_factor is %lf \n", lidar_error_factor);
+            hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", control_p, control_i, control_d, control_ff);
+
+            float pid_output = control_p + control_i + control_d + control_ff;
+
+            // call attitude controller
+            attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(pid_output, target_pitch, target_yaw_rate);
+
+            // adjust climb rate using rangefinder
+            target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control->get_alt_target(), G_Dt);
+
+            // get avoidance adjusted climb rate
+            target_climb_rate = get_avoidance_adjusted_climbrate(target_climb_rate);
+
+            // call position controller
+            pos_control->set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
+            pos_control->update_z_controller();
+            break;
+
+        } else {
+
+            // call attitude controller
+            attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
+
+            // adjust climb rate using rangefinder
+            target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control->get_alt_target(), G_Dt);
+
+            // get avoidance adjusted climb rate
+            target_climb_rate = get_avoidance_adjusted_climbrate(target_climb_rate);
+
+            // call position controller
+            pos_control->set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
+            pos_control->update_z_controller();
+            break;
+
+        }
     }
 }
