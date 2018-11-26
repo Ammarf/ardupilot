@@ -598,6 +598,16 @@ public:
 #define HOLD_DT      0.02f
 #define HOLD_FF      1.0f
 
+    AC_PID upward_hold_pid;
+
+#define UPWARD_HOLD_P       2.0f
+#define UPWARD_HOLD_I       0.0f
+#define UPWARD_HOLD_D       0.0f
+#define UPWARD_HOLD_IMAX    1.0f
+#define UPWARD_HOLD_FILT    10.0f
+#define UPWARD_HOLD_DT      0.02f
+#define UPWARD_HOLD_FF      1.0f
+
 };
 
 extern const AP_Param::Info        var_info[];

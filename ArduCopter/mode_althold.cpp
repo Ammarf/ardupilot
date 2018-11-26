@@ -30,8 +30,10 @@ void Copter::ModeAltHold::run()
     copter.rangefinder.update();
 
     float lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90);
+    float upward_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90);
 
     //hal.console->printf("lidar_input is %lf \n", lidar_input);
+    //hal.console->printf("upward_lidar_input is %lf \n", upward_lidar_input);
 
     // initialize vertical speeds and acceleration
     pos_control->set_speed_z(-get_pilot_speed_dn(), g.pilot_speed_up);
@@ -153,9 +155,11 @@ void Copter::ModeAltHold::run()
         uint16_t radio12_in = rc12->get_radio_in();
         uint16_t radio14_in = rc14->get_radio_in();
 
-        if (radio14_in > 1800 && lidar_input < 600) {
+        //hal.console->printf("lidar_input is %lf \n", lidar_input);
 
-            float setpoint = (radio12_in - 1094) * (600.0f - 200.0f) / (1934 - 1094) + 200.0f;
+        if (radio12_in > 1800 && lidar_input < 600) {
+
+            float setpoint = (radio14_in - 1094) * (600.0f - 200.0f) / (1934 - 1094) + 200.0f;
             float lidar_error = lidar_input - setpoint;
 
             float lidar_error_max = 1.00f;
@@ -167,11 +171,49 @@ void Copter::ModeAltHold::run()
             float control_d = g2.hold_pid.get_d();
             float control_ff = g2.hold_pid.get_ff(lidar_error_factor);
 
-
             //hal.console->printf("lidar_error_factor is %lf \n", lidar_error_factor);
-            hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", control_p, control_i, control_d, control_ff);
+            //hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", control_p, control_i, control_d, control_ff);
 
             float pid_output = control_p + control_i + control_d + control_ff;
+
+            float upward_setpoint = 400.0f;
+            float upward_lidar_error = upward_lidar_input - upward_setpoint;
+
+            float upward_lidar_error_max = 1.00f;
+            float upward_lidar_error_factor = upward_lidar_error / upward_lidar_error_max;
+
+            /*
+            if (upward_lidar_input >= 30.0f && upward_lidar_input <= 700.0f) {
+
+                g2.upward_hold_pid.set_input_filter_all(upward_lidar_error);
+                float upward_control_p = g2.upward_hold_pid.get_p();
+                float upward_control_i = g2.upward_hold_pid.get_i();
+                float upward_control_d = g2.upward_hold_pid.get_d();
+                float upward_control_ff = g2.upward_hold_pid.get_ff(upward_lidar_error_factor);
+
+                float upward_pid_output = upward_control_p + upward_control_i + upward_control_d + upward_control_ff;
+
+                target_climb_rate = get_pilot_desired_climb_rate(upward_pid_output);
+
+                //hal.console->printf("target_climb_rate is %lf \n", target_climb_rate);
+
+            }
+*/
+
+            g2.upward_hold_pid.set_input_filter_all(upward_lidar_error);
+            float upward_control_p = g2.upward_hold_pid.get_p();
+            float upward_control_i = g2.upward_hold_pid.get_i();
+            float upward_control_d = g2.upward_hold_pid.get_d();
+            float upward_control_ff = g2.upward_hold_pid.get_ff(upward_lidar_error_factor);
+
+            float upward_pid_output = upward_control_p + upward_control_i + upward_control_d + upward_control_ff;
+            //upward_pid_output = constrain_float(upward_pid_output, -200.0f, 200.0f);
+
+            target_climb_rate = get_pilot_desired_climb_rate(upward_pid_output);
+
+            //hal.console->printf("target_climb_rate is %lf \n", upward_pid_output);
+            hal.console->printf("target_climb_rate is %lf \n", target_climb_rate);
+            //hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", upward_control_p, upward_control_i, upward_control_d, upward_control_ff);
 
             // call attitude controller
             attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(pid_output, target_pitch, target_yaw_rate);

@@ -1029,6 +1029,49 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
 AP_SUBGROUPINFO(hold_pid, "_HOLD", 28, ParametersG2, AC_PID),
 
+    // @Param: UPWARD_HOLD_P
+    // @DisplayName: Upward copter hold control P gain
+    // @Description: Upward copter hold control P gain
+    // @Range: 0.000 2.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: UPWARD_HOLD_I
+    // @DisplayName: Upward copter hold control I gain
+    // @Description: Upward copter hold control I gain
+    // @Range: 0.000 2.000
+    // @User: Standard
+
+    // @Param: UPWARD_HOLD_IMAX
+    // @DisplayName: Upward copter hold I gain maximum
+    // @Description: Upward copter hold I gain maximum
+    // @Range: 0.000 1.000
+    // @Increment: 0.01
+    // @User: Standard
+
+    // @Param: UPWARD_HOLD_D
+    // @DisplayName: Upward copter hold control D gain
+    // @Description: Upward copter hold control D gain
+    // @Range: 0.000 0.100
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: UPWARD_HOLD_FF
+    // @DisplayName: Upward copter hold feed forward
+    // @Description: Upward copter hold feed forward
+    // @Range: 0.000 0.500
+    // @Increment: 0.001
+    // @User: Standard
+
+    // @Param: UPWARD_HOLD_FILT
+    // @DisplayName: Upward copter hold filter frequency
+    // @Description: Upward copter hold filter frequency
+    // @Range: 0.000 100.000
+    // @Increment: 0.1
+    // @Units: Hz
+    // @User: Standard
+AP_SUBGROUPINFO(upward_hold_pid, "_UPWARD_HOLD", 29, ParametersG2, AC_PID),
+
     AP_GROUPEND
 };
 
@@ -1057,6 +1100,7 @@ ParametersG2::ParametersG2(void)
     ,follow()
 #endif
     , hold_pid(HOLD_P, HOLD_I, HOLD_D, HOLD_IMAX, HOLD_FILT, HOLD_DT, HOLD_FF)
+    , upward_hold_pid(UPWARD_HOLD_P, UPWARD_HOLD_I, UPWARD_HOLD_D, UPWARD_HOLD_IMAX, UPWARD_HOLD_FILT, UPWARD_HOLD_DT, UPWARD_HOLD_FF)
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
