@@ -211,8 +211,8 @@ void Copter::ModeAltHold::run()
             target_climb_rate = get_pilot_desired_climb_rate(upward_pid_output);
 
             //hal.console->printf("target_climb_rate is %lf \n", upward_pid_output);
-            hal.console->printf("target_climb_rate is %lf \n", target_climb_rate);
-            hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", upward_control_p, upward_control_i, upward_control_d, upward_control_ff);
+            //hal.console->printf("target_climb_rate is %lf \n", target_climb_rate);
+            //hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", upward_control_p, upward_control_i, upward_control_d, upward_control_ff);
 
             // call attitude controller
             attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(pid_output, target_pitch, target_yaw_rate);
