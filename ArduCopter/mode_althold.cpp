@@ -29,8 +29,8 @@ void Copter::ModeAltHold::run()
 
     copter.rangefinder.update();
 
-    float lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90);
-    float upward_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90);
+    float lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90) * ahrs.cos_roll();;
+    float upward_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90) * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
 
     //hal.console->printf("lidar_input is %lf \n", lidar_input);
     //hal.console->printf("upward_lidar_input is %lf \n", upward_lidar_input);
@@ -176,28 +176,14 @@ void Copter::ModeAltHold::run()
 
             float pid_output = control_p + control_i + control_d + control_ff;
 
+/*
+            // UOWARD LIDAR PID
             float upward_setpoint = 400.0f;
             float upward_lidar_error = upward_lidar_input - upward_setpoint;
 
             float upward_lidar_error_max = 1.00f;
             float upward_lidar_error_factor = upward_lidar_error / upward_lidar_error_max;
 
-            /*
-            if (upward_lidar_input >= 30.0f && upward_lidar_input <= 700.0f) {
-
-                g2.upward_hold_pid.set_input_filter_all(upward_lidar_error);
-                float upward_control_p = g2.upward_hold_pid.get_p();
-                float upward_control_i = g2.upward_hold_pid.get_i();
-                float upward_control_d = g2.upward_hold_pid.get_d();
-                float upward_control_ff = g2.upward_hold_pid.get_ff(upward_lidar_error_factor);
-
-                float upward_pid_output = upward_control_p + upward_control_i + upward_control_d + upward_control_ff;
-
-                target_climb_rate = get_pilot_desired_climb_rate(upward_pid_output);
-
-                //hal.console->printf("target_climb_rate is %lf \n", target_climb_rate);
-            }
-*/
 
             g2.upward_hold_pid.set_input_filter_all(upward_lidar_error);
             float upward_control_p = g2.upward_hold_pid.get_p();
@@ -208,12 +194,12 @@ void Copter::ModeAltHold::run()
             float upward_pid_output = upward_control_p + upward_control_i + upward_control_d + upward_control_ff;
             //upward_pid_output = constrain_float(upward_pid_output, -10.0f, 10.0f);
 
-            target_climb_rate = get_pilot_desired_climb_rate(upward_pid_output);
+            target_climb_rate = get_pilot_desired_climb_rate(500.0f - upward_pid_output);
 
             //hal.console->printf("target_climb_rate is %lf \n", upward_pid_output);
             //hal.console->printf("target_climb_rate is %lf \n", target_climb_rate);
             //hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", upward_control_p, upward_control_i, upward_control_d, upward_control_ff);
-
+*/
             // call attitude controller
             attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(pid_output, target_pitch, target_yaw_rate);
 
