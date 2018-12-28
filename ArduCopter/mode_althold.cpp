@@ -1,5 +1,8 @@
 #include "Copter.h"
 
+bool right_enable = false;
+bool left_enable = false;
+bool up_enable = false;
 
 /*
  * Init and run calls for althold, flight mode
@@ -14,6 +17,12 @@ bool Copter::ModeAltHold::init(bool ignore_checks)
         pos_control->set_desired_velocity_z(inertial_nav.get_velocity_z());
     }
 
+    float right_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90) * ahrs.cos_roll();
+    float left_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_270) * ahrs.cos_roll();
+    float upward_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90) * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
+
+    gcs().send_text(MAV_SEVERITY_INFO, "right: %f, left: %f, up: %f", right_lidar_input, left_lidar_input, upward_lidar_input);
+
     return true;
 }
 
@@ -24,16 +33,18 @@ void Copter::ModeAltHold::run()
     AltHoldModeState althold_state;
     float takeoff_climb_rate = 0.0f;
 
+    RC_Channel *rc11 = RC_Channels::rc_channel(CH_11);
     RC_Channel *rc12 = RC_Channels::rc_channel(CH_12);
+    RC_Channel *rc13 = RC_Channels::rc_channel(CH_13);
     RC_Channel *rc14 = RC_Channels::rc_channel(CH_14);
+    RC_Channel *rc15 = RC_Channels::rc_channel(CH_15);
+    RC_Channel *rc16 = RC_Channels::rc_channel(CH_16);
 
     copter.rangefinder.update();
 
-    float lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90) * ahrs.cos_roll();;
+    float right_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90) * ahrs.cos_roll();
+    float left_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_YAW_270) * ahrs.cos_roll();
     float upward_lidar_input = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90) * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
-
-    //hal.console->printf("lidar_input is %lf \n", lidar_input);
-    //hal.console->printf("upward_lidar_input is %lf \n", upward_lidar_input);
 
     // initialize vertical speeds and acceleration
     pos_control->set_speed_z(-get_pilot_speed_dn(), g.pilot_speed_up);
@@ -152,38 +163,75 @@ void Copter::ModeAltHold::run()
         copter.avoid.adjust_roll_pitch(target_roll, target_pitch, copter.aparm.angle_max);
 #endif
 
+        uint16_t radio11_in = rc11->get_radio_in();
         uint16_t radio12_in = rc12->get_radio_in();
+        uint16_t radio13_in = rc13->get_radio_in();
         uint16_t radio14_in = rc14->get_radio_in();
+        uint16_t radio15_in = rc15->get_radio_in();
+        uint16_t radio16_in = rc16->get_radio_in();
 
-        //hal.console->printf("lidar_input is %lf \n", lidar_input);
+        if (radio11_in > 1700 && right_lidar_input > 10 && right_lidar_input < 600) {
+            float right_setpoint = (radio12_in - 1094) * (400.0f - 50.0f) / (1934 - 1094) + 50.0f;
+            float right_lidar_error = right_lidar_input - right_setpoint;
 
-        if (radio12_in > 1800 && lidar_input < 600) {
+            float right_lidar_error_max = 1.00f;
+            float right_lidar_error_factor = right_lidar_error / right_lidar_error_max;
 
-            float setpoint = (radio14_in - 1094) * (600.0f - 200.0f) / (1934 - 1094) + 200.0f;
-            float lidar_error = lidar_input - setpoint;
+            g2.right_hold_pid.set_input_filter_all(right_lidar_error);
+            float right_control_p = g2.right_hold_pid.get_p();
+            float right_control_i = g2.right_hold_pid.get_i();
+            float right_control_d = g2.right_hold_pid.get_d();
+            float right_control_ff = g2.right_hold_pid.get_ff(right_lidar_error_factor);
 
-            float lidar_error_max = 1.00f;
-            float lidar_error_factor = lidar_error / lidar_error_max;
+            float right_pid_output = right_control_p + right_control_i + right_control_d + right_control_ff;
 
-            g2.hold_pid.set_input_filter_all(lidar_error);
-            float control_p = g2.hold_pid.get_p();
-            float control_i = g2.hold_pid.get_i();
-            float control_d = g2.hold_pid.get_d();
-            float control_ff = g2.hold_pid.get_ff(lidar_error_factor);
+            if (right_enable == false) {
+                gcs().send_text(MAV_SEVERITY_INFO, "right: %f, set: %f, pid: %f", right_lidar_input, right_setpoint, right_pid_output);
+                right_enable = true;
+            }
+            // call attitude controller
+            attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(right_pid_output, target_pitch, target_yaw_rate);
+        } else {
+            right_enable = false;
 
-            //hal.console->printf("lidar_error_factor is %lf \n", lidar_error_factor);
-            //hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", control_p, control_i, control_d, control_ff);
+            // call attitude controller
+            attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
+        }
 
-            float pid_output = control_p + control_i + control_d + control_ff;
+        if (radio15_in > 1700 && left_lidar_input > 10 && left_lidar_input < 600) {
+        	float left_setpoint = (radio16_in - 1094) * (400.0f - 50.0f) / (1934 - 1094) + 50.0f;
+        	float left_lidar_error = left_lidar_input - left_setpoint;
 
-/*
-            // UOWARD LIDAR PID
-            float upward_setpoint = 400.0f;
+        	float left_lidar_error_max = 1.00f;
+        	float left_lidar_error_factor = left_lidar_error / left_lidar_error_max;
+
+        	g2.left_hold_pid.set_input_filter_all(left_lidar_error);
+        	float left_control_p = g2.left_hold_pid.get_p();
+        	float left_control_i = g2.left_hold_pid.get_i();
+        	float left_control_d = g2.left_hold_pid.get_d();
+        	float left_control_ff = g2.left_hold_pid.get_ff(left_lidar_error_factor);
+
+        	float left_pid_output = left_control_p + left_control_i + left_control_d + left_control_ff;
+
+        	if (left_enable == false) {
+        		gcs().send_text(MAV_SEVERITY_INFO, "left: %f, set: %f, pid: %f", left_lidar_input, left_setpoint, left_pid_output);
+        		left_enable = true;
+        	}
+        	// call attitude controller
+        	attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(-left_pid_output, target_pitch, target_yaw_rate);
+        } else {
+        	left_enable = false;
+
+        	// call attitude controller
+        	attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
+        }
+
+        if (radio13_in > 1700 && upward_lidar_input > 10 && upward_lidar_input < 800) {
+            float upward_setpoint = (radio14_in - 1094) * (600.0f - 50.0f) / (1934 - 1094) + 50.0f;
             float upward_lidar_error = upward_lidar_input - upward_setpoint;
 
             float upward_lidar_error_max = 1.00f;
             float upward_lidar_error_factor = upward_lidar_error / upward_lidar_error_max;
-
 
             g2.upward_hold_pid.set_input_filter_all(upward_lidar_error);
             float upward_control_p = g2.upward_hold_pid.get_p();
@@ -191,17 +239,14 @@ void Copter::ModeAltHold::run()
             float upward_control_d = g2.upward_hold_pid.get_d();
             float upward_control_ff = g2.upward_hold_pid.get_ff(upward_lidar_error_factor);
 
-            float upward_pid_output = upward_control_p + upward_control_i + upward_control_d + upward_control_ff;
-            //upward_pid_output = constrain_float(upward_pid_output, -10.0f, 10.0f);
+            float upward_pid_output = -(upward_control_p + upward_control_i + upward_control_d + upward_control_ff);
 
-            target_climb_rate = get_pilot_desired_climb_rate(500.0f - upward_pid_output);
+            target_climb_rate = get_pilot_desired_climb_rate(485 - upward_pid_output);
 
-            //hal.console->printf("target_climb_rate is %lf \n", upward_pid_output);
-            //hal.console->printf("target_climb_rate is %lf \n", target_climb_rate);
-            //hal.console->printf("p is %lf, i is %lf, d is %lf, ff is %lf \n", upward_control_p, upward_control_i, upward_control_d, upward_control_ff);
-*/
-            // call attitude controller
-            attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(pid_output, target_pitch, target_yaw_rate);
+            if (up_enable == false) {
+                gcs().send_text(MAV_SEVERITY_INFO, "up: %f, set: %f, pid: %f", upward_lidar_input, upward_setpoint, upward_pid_output);
+                up_enable = true;
+            }
 
             // adjust climb rate using rangefinder
             target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control->get_alt_target(), G_Dt);
@@ -213,11 +258,8 @@ void Copter::ModeAltHold::run()
             pos_control->set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
             pos_control->update_z_controller();
             break;
-
         } else {
-
-            // call attitude controller
-            attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
+            up_enable = false;
 
             // adjust climb rate using rangefinder
             target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control->get_alt_target(), G_Dt);

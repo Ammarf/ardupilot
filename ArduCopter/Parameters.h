@@ -588,15 +588,15 @@ public:
 #endif
 
     // COPTER HOLD TEST
-    AC_PID hold_pid;
+    AC_PID right_hold_pid;
 
-#define HOLD_P       2.0f
-#define HOLD_I       0.0f
-#define HOLD_D       0.0f
-#define HOLD_IMAX    1.0f
-#define HOLD_FILT    10.0f
-#define HOLD_DT      0.02f
-#define HOLD_FF      1.0f
+#define RIGHT_HOLD_P       2.0f
+#define RIGHT_HOLD_I       0.0f
+#define RIGHT_HOLD_D       0.0f
+#define RIGHT_HOLD_IMAX    1.0f
+#define RIGHT_HOLD_FILT    10.0f
+#define RIGHT_HOLD_DT      0.02f
+#define RIGHT_HOLD_FF      1.0f
 
     AC_PID upward_hold_pid;
 
@@ -607,6 +607,16 @@ public:
 #define UPWARD_HOLD_FILT    10.0f
 #define UPWARD_HOLD_DT      0.02f
 #define UPWARD_HOLD_FF      1.0f
+
+    AC_PID left_hold_pid;
+
+#define LEFT_HOLD_P       2.0f
+#define LEFT_HOLD_I       0.0f
+#define LEFT_HOLD_D       0.0f
+#define LEFT_HOLD_IMAX    1.0f
+#define LEFT_HOLD_FILT    10.0f
+#define LEFT_HOLD_DT      0.02f
+#define LEFT_HOLD_FF      1.0f
 
 };
 

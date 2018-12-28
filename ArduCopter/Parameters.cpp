@@ -986,48 +986,48 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(follow, "FOLL", 27, ParametersG2, AP_Follow),
 #endif
 
-    // @Param: HOLD_P
-    // @DisplayName: Copter hold control P gain
-    // @Description: Copter hold control P gain
+    // @Param: RIGHT_HOLD_P
+    // @DisplayName: Right side copter hold control P gain
+    // @Description: Right side copter hold control P gain
     // @Range: 0.000 2.000
     // @Increment: 0.01
     // @User: Standard
 
-    // @Param: HOLD_I
-    // @DisplayName: Copter hold control I gain
-    // @Description: Copter hold control I gain
+    // @Param: RIGHT_HOLD_I
+    // @DisplayName: Right side copter hold control I gain
+    // @Description: Right side copter hold control I gain
     // @Range: 0.000 2.000
     // @User: Standard
 
-    // @Param: HOLD_IMAX
-    // @DisplayName: Copter hold I gain maximum
-    // @Description: Copter hold I gain maximum
+    // @Param: RIGHT_HOLD_IMAX
+    // @DisplayName: Right side copter hold I gain maximum
+    // @Description: Right side copter hold I gain maximum
     // @Range: 0.000 1.000
     // @Increment: 0.01
     // @User: Standard
 
-    // @Param: HOLD_D
-    // @DisplayName: Copter hold control D gain
-    // @Description: Copter hold control D gain
+    // @Param: RIGHT_HOLD_D
+    // @DisplayName: Right side copter hold control D gain
+    // @Description: Right side copter hold control D gain
     // @Range: 0.000 0.100
     // @Increment: 0.001
     // @User: Standard
 
-    // @Param: HOLD_FF
-    // @DisplayName: Copter hold feed forward
-    // @Description: Copter hold feed forward
+    // @Param: RIGHT_HOLD_FF
+    // @DisplayName: Right side copter hold feed forward
+    // @Description: Right side copter hold feed forward
     // @Range: 0.000 0.500
     // @Increment: 0.001
     // @User: Standard
 
-    // @Param: HOLD_FILT
-    // @DisplayName: Copter hold filter frequency
-    // @Description: Copter hold filter frequency
+    // @Param: RIGHT_HOLD_FILT
+    // @DisplayName: Right side copter hold filter frequency
+    // @Description: Right side copter hold filter frequency
     // @Range: 0.000 100.000
     // @Increment: 0.1
     // @Units: Hz
     // @User: Standard
-AP_SUBGROUPINFO(hold_pid, "_HOLD", 28, ParametersG2, AC_PID),
+AP_SUBGROUPINFO(right_hold_pid, "_RIGHT_HOLD", 28, ParametersG2, AC_PID),
 
     // @Param: UPWARD_HOLD_P
     // @DisplayName: Upward copter hold control P gain
@@ -1072,6 +1072,49 @@ AP_SUBGROUPINFO(hold_pid, "_HOLD", 28, ParametersG2, AC_PID),
     // @User: Standard
 AP_SUBGROUPINFO(upward_hold_pid, "_UPWARD_HOLD", 29, ParametersG2, AC_PID),
 
+	// @Param: LEFT_HOLD_P
+	// @DisplayName: Left side copter hold control P gain
+	// @Description: Left side copter hold control P gain
+	// @Range: 0.000 2.000
+	// @Increment: 0.01
+	// @User: Standard
+
+	// @Param: LEFT_HOLD_I
+	// @DisplayName: Left side copter hold control I gain
+	// @Description: Left side copter hold control I gain
+	// @Range: 0.000 2.000
+	// @User: Standard
+
+	// @Param: LEFT_HOLD_IMAX
+	// @DisplayName: Left side copter hold I gain maximum
+	// @Description: Left side copter hold I gain maximum
+	// @Range: 0.000 1.000
+	// @Increment: 0.01
+	// @User: Standard
+
+	// @Param: LEFT_HOLD_D
+	// @DisplayName: Left side copter hold control D gain
+	// @Description: Left side copter hold control D gain
+	// @Range: 0.000 0.100
+	// @Increment: 0.001
+	// @User: Standard
+
+	// @Param: LEFT_HOLD_FF
+	// @DisplayName: Left side copter hold feed forward
+	// @Description: Left side copter hold feed forward
+	// @Range: 0.000 0.500
+	// @Increment: 0.001
+	// @User: Standard
+
+	// @Param: LEFT_HOLD_FILT
+	// @DisplayName: Left side copter hold filter frequency
+	// @Description: Left side copter hold filter frequency
+	// @Range: 0.000 100.000
+	// @Increment: 0.1
+	// @Units: Hz
+	// @User: Standard
+AP_SUBGROUPINFO(left_hold_pid, "_LEFT_HOLD", 30, ParametersG2, AC_PID),
+
     AP_GROUPEND
 };
 
@@ -1099,8 +1142,9 @@ ParametersG2::ParametersG2(void)
 #if MODE_FOLLOW_ENABLED == ENABLED
     ,follow()
 #endif
-    , hold_pid(HOLD_P, HOLD_I, HOLD_D, HOLD_IMAX, HOLD_FILT, HOLD_DT, HOLD_FF)
+    , right_hold_pid(RIGHT_HOLD_P, RIGHT_HOLD_I, RIGHT_HOLD_D, RIGHT_HOLD_IMAX, RIGHT_HOLD_FILT, RIGHT_HOLD_DT, RIGHT_HOLD_FF)
     , upward_hold_pid(UPWARD_HOLD_P, UPWARD_HOLD_I, UPWARD_HOLD_D, UPWARD_HOLD_IMAX, UPWARD_HOLD_FILT, UPWARD_HOLD_DT, UPWARD_HOLD_FF)
+	, left_hold_pid(LEFT_HOLD_P, LEFT_HOLD_I, LEFT_HOLD_D, LEFT_HOLD_IMAX, LEFT_HOLD_FILT, UPWARD_HOLD_DT, UPWARD_HOLD_FF)
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
