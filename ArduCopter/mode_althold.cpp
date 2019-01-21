@@ -34,11 +34,8 @@ void Copter::ModeAltHold::run()
     float takeoff_climb_rate = 0.0f;
 
     RC_Channel *rc11 = RC_Channels::rc_channel(CH_11);
-    RC_Channel *rc12 = RC_Channels::rc_channel(CH_12);
-    RC_Channel *rc13 = RC_Channels::rc_channel(CH_13);
+    RC_Channel *rc10 = RC_Channels::rc_channel(CH_10);
     RC_Channel *rc14 = RC_Channels::rc_channel(CH_14);
-    RC_Channel *rc15 = RC_Channels::rc_channel(CH_15);
-    RC_Channel *rc16 = RC_Channels::rc_channel(CH_16);
 
     copter.rangefinder.update();
 
@@ -163,15 +160,13 @@ void Copter::ModeAltHold::run()
         copter.avoid.adjust_roll_pitch(target_roll, target_pitch, copter.aparm.angle_max);
 #endif
 
-        uint16_t radio11_in = rc11->get_radio_in();
-        uint16_t radio12_in = rc12->get_radio_in();
-        uint16_t radio13_in = rc13->get_radio_in();
-        uint16_t radio14_in = rc14->get_radio_in();
-        uint16_t radio15_in = rc15->get_radio_in();
-        uint16_t radio16_in = rc16->get_radio_in();
+        uint16_t radio11_in = rc11->get_radio_in(); // ENABLE SIDE LIDARS
+        uint16_t radio10_in = rc10->get_radio_in(); // SWITCH BETWEEN RIGHT AND LEFT SIDE LIDAR
+        uint16_t radio14_in = rc14->get_radio_in(); // ENABLE UPWARD LIDAR
 
-        if (radio11_in > 1700 && right_lidar_input > 10 && right_lidar_input < 600) {
-            float right_setpoint = (radio12_in - 1094) * (400.0f - 50.0f) / (1934 - 1094) + 50.0f;
+
+        if (radio11_in > 1700 && radio10_in < 1700 && right_lidar_input > 10 && right_lidar_input < 600) {
+            float right_setpoint = g2.side_setpoint;
             float right_lidar_error = right_lidar_input - right_setpoint;
 
             float right_lidar_error_max = 1.00f;
@@ -198,8 +193,8 @@ void Copter::ModeAltHold::run()
             attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
         }
 
-        if (radio15_in > 1700 && left_lidar_input > 10 && left_lidar_input < 600) {
-        	float left_setpoint = (radio16_in - 1094) * (400.0f - 50.0f) / (1934 - 1094) + 50.0f;
+        if (radio11_in > 1700 && radio10_in > 1700 && left_lidar_input > 10 && left_lidar_input < 600) {
+        	float left_setpoint = g2.side_setpoint;
         	float left_lidar_error = left_lidar_input - left_setpoint;
 
         	float left_lidar_error_max = 1.00f;
@@ -226,8 +221,8 @@ void Copter::ModeAltHold::run()
         	attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
         }
 
-        if (radio13_in > 1700 && upward_lidar_input > 10 && upward_lidar_input < 800) {
-            float upward_setpoint = (radio14_in - 1094) * (600.0f - 50.0f) / (1934 - 1094) + 50.0f;
+        if (radio14_in > 1700 && upward_lidar_input > 10 && upward_lidar_input < 800) {
+            float upward_setpoint = g2.upward_setpoint;
             float upward_lidar_error = upward_lidar_input - upward_setpoint;
 
             float upward_lidar_error_max = 1.00f;

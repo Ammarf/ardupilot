@@ -588,6 +588,10 @@ public:
 #endif
 
     // COPTER HOLD TEST
+
+    AP_Float side_setpoint;
+    AP_Float upward_setpoint;
+
     AC_PID right_hold_pid;
 
 #define RIGHT_HOLD_P       2.0f

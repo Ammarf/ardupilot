@@ -1027,7 +1027,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Increment: 0.1
     // @Units: Hz
     // @User: Standard
-AP_SUBGROUPINFO(right_hold_pid, "_RIGHT_HOLD", 28, ParametersG2, AC_PID),
+	AP_SUBGROUPINFO(right_hold_pid, "RIGHT_HOLD_", 28, ParametersG2, AC_PID),
 
     // @Param: UPWARD_HOLD_P
     // @DisplayName: Upward copter hold control P gain
@@ -1070,7 +1070,7 @@ AP_SUBGROUPINFO(right_hold_pid, "_RIGHT_HOLD", 28, ParametersG2, AC_PID),
     // @Increment: 0.1
     // @Units: Hz
     // @User: Standard
-AP_SUBGROUPINFO(upward_hold_pid, "_UPWARD_HOLD", 29, ParametersG2, AC_PID),
+	AP_SUBGROUPINFO(upward_hold_pid, "UPWARD_HOLD_", 29, ParametersG2, AC_PID),
 
 	// @Param: LEFT_HOLD_P
 	// @DisplayName: Left side copter hold control P gain
@@ -1113,7 +1113,23 @@ AP_SUBGROUPINFO(upward_hold_pid, "_UPWARD_HOLD", 29, ParametersG2, AC_PID),
 	// @Increment: 0.1
 	// @Units: Hz
 	// @User: Standard
-AP_SUBGROUPINFO(left_hold_pid, "_LEFT_HOLD", 30, ParametersG2, AC_PID),
+	AP_SUBGROUPINFO(left_hold_pid, "LEFT_HOLD_", 30, ParametersG2, AC_PID),
+
+	// @Param: SIDE_SETPOINT
+	// @DisplayName: Setpoint for copter sidway hold
+	// @Description: Sideway distance from obstacle at which the copter will hold its position
+	// @Values: 100 1000
+	// @Increment: 10.0
+	// @User: Standard
+	AP_GROUPINFO("SIDE_SETPOINT", 31, ParametersG2, side_setpoint, 200),
+
+	// @Param: UPWARD_SETPOINT
+	// @DisplayName: Setpoint for upward copter hold
+	// @Description: Upward distance from obstacle at which the copter will hold its position
+	// @Values: 100 1000
+	// @Increment: 10.0
+	// @User: Standard
+	AP_GROUPINFO("UPWARD_SETPOINT", 32, ParametersG2, upward_setpoint, 500),
 
     AP_GROUPEND
 };
