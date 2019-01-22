@@ -186,11 +186,7 @@ void Copter::ModeAltHold::run()
             }
             // call attitude controller
             attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(right_pid_output, target_pitch, target_yaw_rate);
-        } else {
-            right_enable = false;
-
-            // call attitude controller
-            attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
+            gcs().send_text(MAV_SEVERITY_INFO, "now it's by itself");
         }
 
         if (radio11_in > 1700 && radio10_in > 1700 && left_lidar_input > 10 && left_lidar_input < 600) {
@@ -214,11 +210,12 @@ void Copter::ModeAltHold::run()
         	}
         	// call attitude controller
         	attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(-left_pid_output, target_pitch, target_yaw_rate);
-        } else {
-        	left_enable = false;
+        }
 
-        	// call attitude controller
+        if (radio11_in < 1700) {
+
         	attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
+
         }
 
         if (radio14_in > 1700 && upward_lidar_input > 10 && upward_lidar_input < 800) {
