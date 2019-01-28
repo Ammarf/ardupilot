@@ -186,7 +186,6 @@ void Copter::ModeAltHold::run()
             }
             // call attitude controller
             attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(right_pid_output, target_pitch, target_yaw_rate);
-            gcs().send_text(MAV_SEVERITY_INFO, "now it's by itself");
         }
 
         if (radio11_in > 1700 && radio10_in > 1700 && left_lidar_input > 10 && left_lidar_input < 600) {
