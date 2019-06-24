@@ -297,7 +297,7 @@ void AP_MotorsMatrix::output_armed_stabilizing()
     // add scaled roll, pitch, constrained yaw and throttle for each motor
     for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
-            _thrust_rpyt_out[i] = throttle_thrust_best_rpy + thr_adj + (rpy_scale * _thrust_rpyt_out[i]);
+            _thrust_rpyt_out[i] = ((throttle_thrust_best_rpy + thr_adj) * _throttle_factor[i]) + (rpy_scale * _thrust_rpyt_out[i]);
         }
     }
 
@@ -425,6 +425,13 @@ void AP_MotorsMatrix::add_motor_raw(int8_t motor_num, float roll_fac, float pitc
         // call parent class method
         add_motor_num(motor_num);
     }
+}
+
+void AP_MotorsMatrix::add_motor_raw_speeder(int8_t motor_num, float roll_fac, float pitch_fac, float yaw_fac, float throttle_fac, uint8_t testing_order)
+{
+    add_motor_raw(motor_num, roll_fac, pitch_fac, yaw_fac, testing_order);
+
+    _throttle_factor[motor_num] = throttle_fac;
 }
 
 // add_motor using just position and prop direction - assumes that for each motor, roll and pitch factors are equal
@@ -784,6 +791,19 @@ void AP_MotorsMatrix::setup_motors(motor_frame_class frame_class, motor_frame_ty
             }
             break;
 
+        case MOTOR_FRAME_SPEEDER:
+            switch (frame_type) {
+            default:
+                add_motor_raw_speeder(AP_MOTORS_MOT_1, cosf(radians(45 + 90)), cosf(radians(45)), AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 0.0f, 1);
+                add_motor_raw_speeder(AP_MOTORS_MOT_2, cosf(radians(-135 + 90)), cosf(radians(-135)), AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 0.0f, 3);
+                add_motor_raw_speeder(AP_MOTORS_MOT_3, cosf(radians(-45 + 90)), cosf(radians(-45)), AP_MOTORS_MATRIX_YAW_FACTOR_CW, 0.0f, 4);
+                add_motor_raw_speeder(AP_MOTORS_MOT_4, cosf(radians(135 + 90)), cosf(radians(45)), AP_MOTORS_MATRIX_YAW_FACTOR_CW, 0.0f, 2);
+                add_motor_raw_speeder(AP_MOTORS_MOT_5, 0.0f, 0.0f, 0.0f, 1.0f, 5);
+                add_motor_raw_speeder(AP_MOTORS_MOT_6, 0.0f, 0.0f, 0.0f, 1.0f, 6);
+
+            }
+            break;
+
         default:
             // matrix doesn't support the configured class
             success = false;
@@ -802,6 +822,7 @@ void AP_MotorsMatrix::normalise_rpy_factors()
     float roll_fac = 0.0f;
     float pitch_fac = 0.0f;
     float yaw_fac = 0.0f;
+    float throttle_fac = 0.0f;
 
     // find maximum roll, pitch and yaw factors
     for (uint8_t i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
@@ -814,6 +835,9 @@ void AP_MotorsMatrix::normalise_rpy_factors()
             }
             if (yaw_fac < fabsf(_yaw_factor[i])) {
                 yaw_fac = fabsf(_yaw_factor[i]);
+            }
+            if (throttle_fac < fabsf(_throttle_factor[i])) {
+                throttle_fac = fabsf(_throttle_factor[i]);
             }
         }
     }
@@ -829,6 +853,9 @@ void AP_MotorsMatrix::normalise_rpy_factors()
             }
             if (!is_zero(yaw_fac)) {
                 _yaw_factor[i] = 0.5f*_yaw_factor[i]/yaw_fac;
+            }
+            if (!is_zero(throttle_fac)) {
+                _throttle_factor[i] = 0.5f*_throttle_factor[i]/throttle_fac;
             }
         }
     }
