@@ -422,8 +422,8 @@ bool NavEKF2_core::setOriginLLH(const Location &loc)
         return false;
     }
 
-    EKF_origin.lat = 35.661031;
-    EKF_origin.lng = 139.748959;
+    EKF_origin.lat = 15556784;
+    EKF_origin.lng = 4254078;
     EKF_origin.alt = 163000;
 
     ekfGpsRefHgt = (double)0.01 * (double)EKF_origin.alt;
@@ -437,8 +437,8 @@ bool NavEKF2_core::setOriginLLH(const Location &loc)
 void NavEKF2_core::setOrigin()
 {
     // assume origin at current GPS location (no averaging)
-    EKF_origin.lat = 35.661031;
-    EKF_origin.lng = 139.748959;
+    EKF_origin.lat = 15556784;
+    EKF_origin.lng = 4254078;
     EKF_origin.alt = 163000;
 
     // if flying, correct for height change from takeoff so that the origin is at field elevation
