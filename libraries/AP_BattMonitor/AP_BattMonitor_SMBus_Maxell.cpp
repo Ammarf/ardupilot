@@ -38,6 +38,45 @@ AP_BattMonitor_SMBus_Maxell::AP_BattMonitor_SMBus_Maxell(AP_BattMonitor &mon,
     : AP_BattMonitor_SMBus(mon, mon_state, params, std::move(dev))
 {}
 
+/**
+ * detect if a Maxell battery is connected. We'll detect by
+ * trying to take a reading on I2C. If we get a result the battery is
+ * there.
+ *
+ * @param [in] mon
+ * @param [in] mon_state
+ * @param [in] params
+ * @param [in] dev
+ * @return sensor instance
+ */
+AP_BattMonitor_Backend *AP_BattMonitor_SMBus_Maxell::detect(AP_BattMonitor &mon,
+                                                            AP_BattMonitor::BattMonitor_State &mon_state,
+                                                            AP_BattMonitor_Params &params,
+                                                            AP_HAL::OwnPtr<AP_HAL::I2CDevice> dev)
+{
+    AP_BattMonitor_SMBus_Maxell *sensor = new AP_BattMonitor_SMBus_Maxell(mon, mon_state, params, std::move(dev));
+    if (!sensor) {
+        return nullptr;
+    }
+
+    if (sensor->_dev->get_semaphore()->take(HAL_SEMAPHORE_BLOCK_FOREVER)) {
+        uint8_t manufactureName[2] {};
+        if (!sensor->_dev->read_registers(BATTMONITOR_SMBUS_MANUFACTURE_NAME, manufactureName, 2)) {
+            sensor->_dev->get_semaphore()->give();
+            delete sensor;
+            return nullptr;
+        }
+
+        sensor->_dev->get_semaphore()->give();
+        if (manufactureName[0] == 0 || manufactureName[0] > 32 || (manufactureName[1] != 'H' && manufactureName[1] != 'm' && manufactureName[1] != 'M')) {
+            delete sensor;
+            return nullptr;
+        }
+    }
+
+    return sensor;
+}
+
 void AP_BattMonitor_SMBus_Maxell::timer()
 {
 	// check if PEC is supported
