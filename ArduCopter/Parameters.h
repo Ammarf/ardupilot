@@ -612,6 +612,9 @@ public:
 
     // vibration failsafe enable/disable
     AP_Int8 fs_vibe_enabled;
+
+    // object detection parameters
+    AP_Int16 od_dist;
 };
 
 extern const AP_Param::Info        var_info[];

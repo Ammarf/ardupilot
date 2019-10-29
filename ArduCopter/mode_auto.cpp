@@ -771,6 +771,13 @@ void ModeAuto::wp_run()
     // set motors to full range
     motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
 
+    copter.rangefinder.update();
+    float obstacle_distance =  copter.rangefinder.distance_cm_orient(ROTATION_NONE);
+    if (obstacle_distance <= g2.od_dist) {
+        gcs().send_text(MAV_SEVERITY_INFO, "Obstacle detected: switching to Loiter");
+        set_mode(Mode::Number::LOITER, MODE_REASON_AVOIDANCE);
+    }
+
     // run waypoint controller
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
 

@@ -947,6 +947,15 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("FS_VIBE_ENABLE", 35, ParametersG2, fs_vibe_enabled, 1),
 
+    // @Param: OD_DIST
+    // @DisplayName: Object detection distance
+    // @Description: Object detection distance
+    // @Units: cm
+    // @Range: 10 1000
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("OD_DIST", 36, ParametersG2, od_dist, 100),
+
     AP_GROUPEND
 };
 
