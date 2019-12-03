@@ -772,8 +772,17 @@ void ModeAuto::wp_run()
     motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
 
     copter.rangefinder.update();
-    float obstacle_distance =  copter.rangefinder.distance_cm_orient(ROTATION_NONE);
-    if (obstacle_distance <= g2.od_dist) {
+    float obstacle_distance_forward =  copter.rangefinder.distance_cm_orient(ROTATION_NONE);
+    float obstacle_distance_right = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90);
+    float obstacle_distance_left = copter.rangefinder.distance_cm_orient(ROTATION_YAW_270);
+    float obstacle_distance_back = copter.rangefinder.distance_cm_orient(ROTATION_YAW_180);
+    float obstacle_distance_upward = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90);
+
+    if (obstacle_distance_forward <= g2.od_dist
+            || obstacle_distance_right <= g2.od_dist
+            || obstacle_distance_left <= g2.od_dist
+            || obstacle_distance_back <= g2.od_dist
+            || obstacle_distance_upward <= g2.od_dist) {
         gcs().send_text(MAV_SEVERITY_INFO, "Obstacle detected: switching to Loiter");
         set_mode(Mode::Number::LOITER, MODE_REASON_AVOIDANCE);
     }
