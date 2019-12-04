@@ -947,14 +947,23 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("FS_VIBE_ENABLE", 35, ParametersG2, fs_vibe_enabled, 1),
 
-    // @Param: OD_DIST
-    // @DisplayName: Object detection distance
-    // @Description: Object detection distance
+    // @Param: MIN_DIST
+    // @DisplayName: Minimum distance allowed from the turbine blade
+    // @Description: Minimum distance allowed from the turbine blade
     // @Units: cm
     // @Range: 10 1000
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("OD_DIST", 36, ParametersG2, od_dist, 100),
+    AP_GROUPINFO("MIN_DIST", 36, ParametersG2, min_dist, 300),
+
+    // @Param: SET_DIST
+    // @DisplayName: Inspection distance the drone has to keep
+    // @Description: Inspection distance the drone has to keep
+    // @Units: cm
+    // @Range: 10 1000
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("SET_DIST", 37, ParametersG2, set_dist, 500),
 
     AP_GROUPEND
 };

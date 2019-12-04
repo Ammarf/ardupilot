@@ -613,8 +613,9 @@ public:
     // vibration failsafe enable/disable
     AP_Int8 fs_vibe_enabled;
 
-    // object detection parameters
-    AP_Int16 od_dist;
+    // turbine inspection parameters
+    AP_Int16 min_dist;
+    AP_Int16 set_dist;
 };
 
 extern const AP_Param::Info        var_info[];

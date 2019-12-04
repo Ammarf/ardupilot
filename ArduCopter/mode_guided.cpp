@@ -434,6 +434,7 @@ void ModeGuided::pos_control_run()
     // set motors to full range
     motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
 
+    /*
     // read rangefinder info
     copter.rangefinder.update();
     float obstacle_distance_forward = copter.rangefinder.distance_cm_orient(ROTATION_NONE);
@@ -441,15 +442,7 @@ void ModeGuided::pos_control_run()
     float obstacle_distance_left = copter.rangefinder.distance_cm_orient(ROTATION_YAW_270);
     float obstacle_distance_back = copter.rangefinder.distance_cm_orient(ROTATION_YAW_180);
     float obstacle_distance_upward = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90);
-
-    if (obstacle_distance_forward <= g2.od_dist
-            || obstacle_distance_right <= g2.od_dist
-            || obstacle_distance_left <= g2.od_dist
-            || obstacle_distance_back  <= g2.od_dist
-            || obstacle_distance_upward <= g2.od_dist) {
-        gcs().send_text(MAV_SEVERITY_INFO, "Obstacle detected: switching to Loiter");
-        set_mode(Mode::Number::LOITER, MODE_REASON_AVOIDANCE);
-    }
+    */
 
     // run waypoint controller
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
