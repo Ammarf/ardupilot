@@ -616,6 +616,7 @@ public:
     // turbine inspection parameters
     AP_Int16 min_dist;
     AP_Int16 set_dist;
+    AP_Float dist_pitch;
 };
 
 extern const AP_Param::Info        var_info[];

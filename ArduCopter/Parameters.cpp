@@ -965,6 +965,14 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("SET_DIST", 37, ParametersG2, set_dist, 500),
 
+    // @Param: DIST_PITCH
+    // @DisplayName: distance keeping pitch factor
+    // @Description: distance keeping pitch factor
+    // @Range: 0.1 10
+    // @Increment: 0.1
+    // @User: Standard
+    AP_GROUPINFO("DIST_PITCH", 38, ParametersG2, dist_pitch, 1),
+
     AP_GROUPEND
 };
 
