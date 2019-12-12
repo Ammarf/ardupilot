@@ -775,12 +775,17 @@ void ModeAuto::wp_run()
     float distance_forward =  copter.rangefinder.distance_cm_orient(ROTATION_NONE);
     float distance_delta = distance_forward - g2.set_dist;
 
-    if (distance_forward <= g2.min_dist) {
-        gcs().send_text(MAV_SEVERITY_INFO, "Blade too close, switching to LOITER");
-        set_mode(Mode::Number::LOITER, MODE_REASON_AVOIDANCE);
+    const Vector3f curr_pos = copter.inertial_nav.get_position();
+    float current_alt = curr_pos.z;
+
+    if (current_alt >= current_alt){
+        if (distance_forward <= g2.min_dist) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Blade too close, switching to LOITER");
+            set_mode(Mode::Number::LOITER, MODE_REASON_AVOIDANCE);
+        }
     }
 
-    float pitch_correction = distance_delta * g2.dist_pitch;
+        float pitch_correction = distance_delta * g2.dist_pitch;
 
     // run waypoint controller
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());

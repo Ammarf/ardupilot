@@ -617,6 +617,7 @@ public:
     AP_Int16 min_dist;
     AP_Int16 set_dist;
     AP_Float dist_pitch;
+    AP_Int16 od_gndclr;
 };
 
 extern const AP_Param::Info        var_info[];

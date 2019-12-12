@@ -973,6 +973,14 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     AP_GROUPINFO("DIST_PITCH", 38, ParametersG2, dist_pitch, 1),
 
+    // @Param: OD_GNDCLR
+    // @DisplayName: distance keeping start altitude
+    // @Description: distance keeping start altitude
+    // @Range: 10 1000
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("OD_GNDCLR", 39, ParametersG2, od_gndclr, 100),
+
     AP_GROUPEND
 };
 
