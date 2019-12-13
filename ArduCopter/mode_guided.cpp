@@ -434,15 +434,23 @@ void ModeGuided::pos_control_run()
     // set motors to full range
     motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
 
-    /*
-    // read rangefinder info
+
     copter.rangefinder.update();
-    float obstacle_distance_forward = copter.rangefinder.distance_cm_orient(ROTATION_NONE);
-    float obstacle_distance_right = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90);
-    float obstacle_distance_left = copter.rangefinder.distance_cm_orient(ROTATION_YAW_270);
-    float obstacle_distance_back = copter.rangefinder.distance_cm_orient(ROTATION_YAW_180);
-    float obstacle_distance_upward = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90);
-    */
+    float distance_forward =  copter.rangefinder.distance_cm_orient(ROTATION_NONE);
+    float distance_delta = distance_forward - g2.set_dist;
+
+    const Vector3f curr_pos = copter.inertial_nav.get_position();
+    float current_alt = curr_pos.z;
+
+    if (current_alt >= current_alt){
+        if (distance_forward <= g2.min_dist) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Blade too close, switching to LOITER");
+            set_mode(Mode::Number::LOITER, MODE_REASON_AVOIDANCE);
+        }
+    }
+
+        float pitch_correction = distance_delta * g2.dist_pitch;
+
 
     // run waypoint controller
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
@@ -453,13 +461,13 @@ void ModeGuided::pos_control_run()
     // call attitude controller
     if (auto_yaw.mode() == AUTO_YAW_HOLD) {
         // roll & pitch from waypoint controller, yaw rate from pilot
-        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav->get_roll(), wp_nav->get_pitch(), target_yaw_rate);
+        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav->get_roll(), (wp_nav->get_pitch() + (pitch_correction * 100.0f)), target_yaw_rate);
     } else if (auto_yaw.mode() == AUTO_YAW_RATE) {
         // roll & pitch from waypoint controller, yaw rate from mavlink command or mission item
-        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav->get_roll(), wp_nav->get_pitch(), auto_yaw.rate_cds());
+        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(wp_nav->get_roll(), (wp_nav->get_pitch() + (pitch_correction * 100.0f)), auto_yaw.rate_cds());
     } else {
         // roll, pitch from waypoint controller, yaw heading from GCS or auto_heading()
-        attitude_control->input_euler_angle_roll_pitch_yaw(wp_nav->get_roll(), wp_nav->get_pitch(), auto_yaw.yaw(), true);
+        attitude_control->input_euler_angle_roll_pitch_yaw(wp_nav->get_roll(), (wp_nav->get_pitch() + (pitch_correction * 100.0f)), auto_yaw.yaw(), true);
     }
 }
 
