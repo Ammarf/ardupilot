@@ -470,7 +470,11 @@ bool NavEKF3_core::setOriginLLH(const Location &loc)
     if (PV_AidingMode == AID_ABSOLUTE) {
         return false;
     }
-    EKF_origin = loc;
+
+    EKF_origin.lat = 356610260;
+    EKF_origin.lng = 1397489910;
+    EKF_origin.alt = 163000;
+
     ekfGpsRefHgt = (double)0.01 * (double)EKF_origin.alt;
     // define Earth rotation vector in the NED navigation frame at the origin
     calcEarthRateNED(earthRateNED, loc.lat);
@@ -481,7 +485,11 @@ bool NavEKF3_core::setOriginLLH(const Location &loc)
 // Set the NED origin to be used until the next filter reset
 void NavEKF3_core::setOrigin(const Location &loc)
 {
-    EKF_origin = loc;
+
+    EKF_origin.lat = 356610260;
+    EKF_origin.lng = 1397489910;
+    EKF_origin.alt = 163000;
+
     // if flying, correct for height change from takeoff so that the origin is at field elevation
     if (inFlight) {
         EKF_origin.alt += (int32_t)(100.0f * stateStruct.position.z);
