@@ -767,6 +767,46 @@ void ModeAuto::wp_run()
     // set motors to full range
     motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
 
+    copter.rangefinder.update();
+
+    // only run obstacle detection if the copter is a set distance off ground
+    const Vector3f& curr_pos = inertial_nav.get_position();
+    uint16_t current_alt = curr_pos.z;
+
+    float obstacle_distance_forward =  copter.rangefinder.distance_cm_orient(ROTATION_NONE) * ahrs.cos_pitch();
+    float obstacle_distance_right = copter.rangefinder.distance_cm_orient(ROTATION_YAW_90) * ahrs.cos_roll();
+    float obstacle_distance_left = copter.rangefinder.distance_cm_orient(ROTATION_YAW_270) * ahrs.cos_roll();
+    float obstacle_distance_downward = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_270) * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
+    float obstacle_distance_upward = copter.rangefinder.distance_cm_orient(ROTATION_PITCH_90) * MAX(0.707f, ahrs.get_rotation_body_to_ned().c.z);
+
+    if (current_alt >= g2.od_gndclr){
+
+        if ((obstacle_distance_forward <= g2.od_dist) && (obstacle_distance_forward > 0.0f)) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Switching to Brake, distance: %f", obstacle_distance_forward);
+            set_mode(Mode::Number::BRAKE, ModeReason::AVOIDANCE);
+        }
+
+        if ((obstacle_distance_right <= g2.od_dist) && (obstacle_distance_right > 0.0f)) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Switching to Brake, distance: %f", obstacle_distance_right);
+            set_mode(Mode::Number::BRAKE, ModeReason::AVOIDANCE);
+        }
+
+        if ((obstacle_distance_left <= g2.od_dist) && (obstacle_distance_left > 0.0f)) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Switching to Brake, distance: %f", obstacle_distance_left);
+            set_mode(Mode::Number::BRAKE, ModeReason::AVOIDANCE);
+        }
+
+        if ((obstacle_distance_downward <= g2.od_dist) && (obstacle_distance_downward > 0.0f)) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Switching to Brake, distance: %f", obstacle_distance_downward);
+            set_mode(Mode::Number::BRAKE, ModeReason::AVOIDANCE);
+        }
+
+        if ((obstacle_distance_upward <= g2.od_dist) && (obstacle_distance_upward > 0.0f)) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Switching to Brake, distance: %f", obstacle_distance_upward);
+            set_mode(Mode::Number::BRAKE, ModeReason::AVOIDANCE);
+        }
+    }
+
     // run waypoint controller
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
 

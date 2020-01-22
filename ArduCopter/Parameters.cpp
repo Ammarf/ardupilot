@@ -961,6 +961,23 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(arot, "AROT_", 37, ParametersG2, AC_Autorotation),
 #endif
 
+    // @Param: OD_DIST
+    // @DisplayName: Object detection distance
+    // @Description: Object detection distance
+    // @Units: cm
+    // @Range: 10 1000
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("OD_DIST", 38, ParametersG2, od_dist, 100),
+
+    // @Param: OD_GNDCLR
+    // @DisplayName: Object detection start altitude
+    // @Description: Object detection start altitude
+    // @Units: cm
+    // @Range: 10 1000
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("OD_GNDCLR", 39, ParametersG2, od_gndclr, 100),
 
 
     AP_GROUPEND

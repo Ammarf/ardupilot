@@ -620,6 +620,10 @@ public:
     // Autonmous autorotation
     AC_Autorotation arot;
 #endif
+
+    // object detection parameters
+    AP_Int16 od_dist;
+    AP_Int16 od_gndclr;
 };
 
 extern const AP_Param::Info        var_info[];
