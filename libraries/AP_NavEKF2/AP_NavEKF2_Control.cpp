@@ -424,7 +424,7 @@ bool NavEKF2_core::setOriginLLH(const Location &loc)
 
     EKF_origin.lat = 356610260;
     EKF_origin.lng = 1397489910;
-    EKF_origin.alt = 163000;
+    EKF_origin.alt = 000000;
 
     ekfGpsRefHgt = (double)0.01 * (double)EKF_origin.alt;
     // define Earth rotation vector in the NED navigation frame at the origin
@@ -439,7 +439,7 @@ void NavEKF2_core::setOrigin()
     // assume origin at current GPS location (no averaging)
     EKF_origin.lat = 356610260;
     EKF_origin.lng = 1397489910;
-    EKF_origin.alt = 163000;
+    EKF_origin.alt = 000000;
 
     // if flying, correct for height change from takeoff so that the origin is at field elevation
     if (inFlight) {
