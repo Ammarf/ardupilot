@@ -17,6 +17,7 @@ static Vector3f guided_pos_target_cm;       // position target (used by posvel c
 static Vector3f guided_vel_target_cms;      // velocity target (used by velocity controller and posvel controller)
 static uint32_t posvel_update_time_ms;      // system time of last target update to posvel controller (i.e. position and velocity update)
 static uint32_t vel_update_time_ms;         // system time of last target update to velocity controller
+static uint16_t wp_reached_flag(0);         // flag to asssure to send WP_reached text_message only once
 
 struct {
     uint32_t update_time_ms;
@@ -429,6 +430,16 @@ void ModeGuided::pos_control_run()
 
     // run waypoint controller
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
+
+    // check if WP is reached, and send 1 text_status if so.
+    if(wp_nav->reached_wp_destination() && !wp_reached_flag){
+        gcs().send_text(MAV_SEVERITY_INFO, "WP_reached");
+        gcs().send_mission_item_reached_message(0);
+        wp_reached_flag = 1;
+    }
+    if(!wp_nav->reached_wp_destination() && wp_reached_flag){
+        wp_reached_flag = 0;
+    }
 
     // call z-axis position controller (wpnav should have already updated it's alt target)
     pos_control->update_z_controller();

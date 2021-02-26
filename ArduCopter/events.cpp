@@ -287,6 +287,9 @@ void Copter::gpsglitch_check()
             gcs().send_text(MAV_SEVERITY_CRITICAL,"GPS Glitch cleared");
         }
     }
+
+    Location origin;
+    copter.ahrs.set_origin(origin);
 }
 
 // set_mode_RTL_or_land_with_pause - sets mode to RTL if possible or LAND with 4 second delay before descent starts
